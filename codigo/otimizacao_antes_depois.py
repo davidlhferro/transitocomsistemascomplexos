@@ -87,15 +87,32 @@ Q_GRADE = np.linspace(0.0, 1.0, 201)   # grade de q para as curvas S1, S2
 # 1. MALHA VIÁRIA
 # =============================================================================
 
-def malha_osm(arquivo_cache):
+def malha_osm(arquivo_cache, arquivo_xml=None):
     """Baixa (ou lê do cache) a malha 'drive' do recorte e devolve um grafo
-    simples não-direcionado com atributos t0 (s), classe, x, y (metros)."""
+    simples não-direcionado com atributos t0 (s), classe, x, y (metros).
+    Se arquivo_xml for dado (recorte feito com codigo/recortar_osm.sh),
+    lê dele em vez de consultar o Overpass."""
     import osmnx as ox
 
     if os.path.exists(arquivo_cache):
         G = ox.load_graphml(arquivo_cache)
+    elif arquivo_xml is not None:
+        G = ox.graph_from_xml(arquivo_xml, bidirectional=False)
+        G = ox.truncate.truncate_graph_bbox(G, BBOX)   # corta as pontas
+        ox.save_graphml(G, arquivo_cache)
     else:
-        G = ox.graph_from_bbox(BBOX, network_type="drive")
+        # Servidor oficial do Overpass e dois espelhos públicos (se um cair)
+        for url in ["https://overpass-api.de/api",
+                    "https://overpass.kumi.systems/api",
+                    "https://overpass.private.coffee/api"]:
+            ox.settings.overpass_url = url
+            try:
+                G = ox.graph_from_bbox(BBOX, network_type="drive")
+                break
+            except Exception as erro:
+                print(f"[aviso] {url} falhou ({type(erro).__name__})")
+        else:
+            raise ConnectionError("nenhum servidor Overpass respondeu")
         ox.save_graphml(G, arquivo_cache)
 
     G = ox.truncate.largest_component(G, strongly=False)
@@ -121,9 +138,12 @@ def multidigrafo_para_grafo(G):
             classe = classe[0]
         classe = classe.replace("_link", "")       # alças herdam a classe
         t0 = float(d["travel_time"])
+        nome = d.get("name", "")
+        if isinstance(nome, list):
+            nome = nome[0]
         if H.has_edge(u, v) and H[u][v]["t0"] <= t0:
             continue
-        H.add_edge(u, v, t0=t0, classe=classe)
+        H.add_edge(u, v, t0=t0, classe=classe, nome=str(nome))
     for n, d in G.nodes(data=True):
         if n in H:
             H.nodes[n]["x"] = float(d["x"])
@@ -209,7 +229,7 @@ def limiar_critico(N, u, v, r):
     """Abre as ligações da MAIS RÁPIDA para a MAIS LENTA (q descendo de 1 a 0)
     juntando clusters com union-find.
 
-    Fato-chave (Handout 1, Dedução D5): S2 só diminui quando os dois MAIORES
+    Fato-chave (handout T1, Exemplo 3): S2 só diminui quando os dois MAIORES
     clusters se fundem, e nesse instante S2 = tamanho do menor deles. Logo
         max_q S2(q) = max sobre fusões de min(s_a, s_b),
     e a ligação que realiza esse máximo é a LIGAÇÃO CRÍTICA. Seu r é q_c.
@@ -273,7 +293,7 @@ def red_bonds(arestas, r, q_c):
     bond no sentido de Coniglio: pontes que só seguram um galho pendurado
     (dangling end) soltam um pedaço pequeno. Por isso ordenamos pela massa.
 
-    Teoria (Handout 1, P5): no ponto crítico há só ~L^(3/4) red bonds.
+    Teoria (handout T1, Problema 8): no ponto crítico há só ~L^(3/4) red bonds.
     Massa de corte = tamanho do menor pedaço. Calculamos todas de uma vez:
     contraímos cada blob (componente 2-aresta-conexo) num nó e ganhamos uma
     árvore cujas arestas são as pontes; a massa de uma ponte é o tamanho da
@@ -458,6 +478,8 @@ def fig_mapa(H, arestas, r, criticas, top_bc, q_c, arquivo):
 
 def main():
     p = argparse.ArgumentParser()
+    p.add_argument("--osm-xml", default=None,
+                   help="recorte .osm local (ver codigo/recortar_osm.sh)")
     p.add_argument("--sintetico", action="store_true",
                    help="usar malha sintética (sem internet)")
     p.add_argument("--dias", type=int, default=40,
@@ -479,7 +501,8 @@ def main():
     H, rotulo = None, "sintetico"
     if not args.sintetico:
         try:
-            H = malha_osm(os.path.join(pasta_dados, "benfica_centro_aldeota.graphml"))
+            H = malha_osm(os.path.join(pasta_dados, "benfica_centro_aldeota.graphml"),
+                          args.osm_xml)
             rotulo = "fortaleza"
         except Exception as erro:
             print(f"[aviso] OSM indisponível ({type(erro).__name__}); "
@@ -613,6 +636,14 @@ def main():
             print(f"{NOME[s]:30s} {x.mean():+.4f} +- {x.std() / np.sqrt(len(x)):.4f}"
                   f"  {y.mean():+.4f} +- {y.std() / np.sqrt(len(y)):.4f}")
     print("(+- = erro padrão da média sobre os dias)")
+
+    # Onde ficam as vias do plano fixo? (nomes do OpenStreetMap)
+    for s in ["guloso", "betweenness"]:
+        print(f"\nPlano fixo, {NOME[s]} (10 primeiras):")
+        for e in plano[s][:10]:
+            a, c = arestas[e]
+            nome = H[a][c].get("nome", "") or "(sem nome)"
+            print(f"   {nome:40s} {H[a][c]['classe']:12s} <r> = {r_treino[e]:.2f}")
 
     # ---- 5. Figuras --------------------------------------------------------
     tag = rotulo

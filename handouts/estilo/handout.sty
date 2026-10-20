@@ -1,0 +1,106 @@
+% handout.sty -- estilo comum dos handouts do projeto
+% Formato inspirado nos handouts de olimpíada de física de Kevin Zhou:
+% "Ideias" em caixa, exemplos resolvidos no texto, problemas com
+% pontuação entre colchetes e soluções no final.
+\NeedsTeXFormat{LaTeX2e}
+\ProvidesPackage{handout}
+
+\RequirePackage[T1]{fontenc}
+\RequirePackage[utf8]{inputenc}
+\RequirePackage[brazil]{babel}
+\RequirePackage{amsmath,mathtools}
+\RequirePackage{newpxtext,newpxmath}          % Palatino (já traz os símbolos AMS)
+\RequirePackage{bm}
+\RequirePackage[a4paper,margin=1in]{geometry}
+\RequirePackage{graphicx,booktabs,array,enumitem,xcolor}
+\RequirePackage[most]{tcolorbox}
+\RequirePackage{fancyhdr,titlesec,microtype,siunitx}
+\RequirePackage[hidelinks]{hyperref}
+\RequirePackage{xurl}           % quebra nomes de arquivo longos
+\RequirePackage{listings}
+
+\sisetup{output-decimal-marker={,}}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{0.55em}
+\setlist{itemsep=0.2em,topsep=0.3em}
+\setlist[enumerate,1]{label=(\alph*)}
+
+% ---------- cores ----------
+\definecolor{tinta}{HTML}{1F2A44}
+\definecolor{caixa}{HTML}{F3F1EA}
+\definecolor{borda}{HTML}{8C7B5A}
+\definecolor{codigo}{HTML}{F6F6F4}
+
+% ---------- cabeçalho ----------
+\pagestyle{fancy}
+\fancyhf{}
+\renewcommand{\headrulewidth}{0.3pt}
+\fancyhead[L]{\small\scshape Percolação no Trânsito de Fortaleza}
+\fancyhead[R]{\small\scshape\@handoutcodigo}
+\fancyfoot[C]{\small\thepage}
+
+\titleformat{\section}{\large\bfseries\color{tinta}}{\thesection}{0.8em}{}
+\titleformat{\subsection}{\normalsize\bfseries\color{tinta}}{\thesubsection}{0.8em}{}
+\titlespacing*{\section}{0pt}{1.4em}{0.5em}
+\titlespacing*{\subsection}{0pt}{1.0em}{0.3em}
+
+% ---------- título ----------
+\newcommand{\@handoutcodigo}{}
+\newcommand{\codigo}[1]{\renewcommand{\@handoutcodigo}{#1}}
+\newcommand{\@handouttitulo}{}
+\newcommand{\titulo}[1]{\renewcommand{\@handouttitulo}{#1}}
+\newcommand{\fazertitulo}{%
+  \thispagestyle{plain}%
+  \begin{center}
+    {\small\scshape Percolação no Trânsito de Fortaleza \,·\, Handouts}\par
+    \vspace{0.6em}
+    {\LARGE\bfseries\color{tinta}\@handoutcodigo: \@handouttitulo}\par
+    \vspace{0.4em}
+    \rule{0.35\textwidth}{0.4pt}
+  \end{center}
+  \vspace{0.3em}}
+
+% ---------- ideias ----------
+\newcounter{ideia}
+\newtcolorbox{ideia}{enhanced, breakable, colback=caixa, colframe=borda,
+  boxrule=0.5pt, arc=1pt, left=8pt, right=8pt, top=5pt, bottom=5pt,
+  before upper={\refstepcounter{ideia}\textbf{\color{tinta}Ideia \theideia}\par\smallskip}}
+
+% ---------- exemplos ----------
+\newcounter{exemplo}
+\newenvironment{exemplo}{\par\medskip\refstepcounter{exemplo}%
+  \noindent\textbf{\color{tinta}Exemplo \theexemplo.}\ }{\par}
+\newenvironment{solucao}{\par\noindent\textit{Solução.}\ }%
+  {\hfill$\blacktriangleleft$\par\medskip}
+
+% ---------- observações ----------
+\newenvironment{obs}{\par\small\noindent\textbf{Observação.}\ }{\par\normalsize}
+
+% ---------- problemas ----------
+\newcounter{problema}
+\newcommand{\problema}[1]{\par\medskip\refstepcounter{problema}%
+  \noindent\textbf{[#1]\ Problema \theproblema.}\ }
+\newcommand{\pontos}[1]{\textit{Total: #1 pontos.}}
+
+% ---------- soluções ----------
+\newcommand{\solucoes}{\clearpage\section*{Soluções}\addcontentsline{toc}{section}{Soluções}}
+\newcommand{\sol}[1]{\par\medskip\noindent\textbf{\color{tinta}Problema #1.}\ }
+
+% ---------- código ----------
+\lstset{basicstyle=\ttfamily\small, backgroundcolor=\color{codigo},
+  frame=single, rulecolor=\color{borda!50}, framerule=0.3pt,
+  columns=fullflexible, keepspaces=true, showstringspaces=false,
+  commentstyle=\color{borda}\itshape, keywordstyle=\color{tinta}\bfseries,
+  language=Python, upquote=true, xleftmargin=4pt, xrightmargin=4pt,
+  literate={á}{{\'a}}1 {ã}{{\~a}}1 {é}{{\'e}}1 {ê}{{\^e}}1 {í}{{\'i}}1
+           {ó}{{\'o}}1 {õ}{{\~o}}1 {ô}{{\^o}}1 {ú}{{\'u}}1 {ç}{{\c c}}1
+           {à}{{\`a}}1 {â}{{\^a}}1 {Á}{{\'A}}1 {É}{{\'E}}1}
+
+% ---------- atalhos ----------
+\newcommand{\avg}[1]{\left\langle #1 \right\rangle}
+\newcommand{\dd}{\mathrm{d}}
+\newcommand{\qc}{q_c}
+\newcommand{\pc}{p_c}
+\renewcommand{\Pr}{\operatorname{Pr}}
+
+\endinput

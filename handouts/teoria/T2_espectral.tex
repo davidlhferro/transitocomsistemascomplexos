@@ -1,0 +1,200 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T2}
+\titulo{Funções Geradoras, Molloy--Reed e a Matriz de Hashimoto}
+
+\begin{document}
+\fazertitulo
+
+No handout T1 resolvemos a percolação em árvores regulares. Aqui generalizamos para redes com \emph{qualquer} distribuição de graus, usando funções geradoras. Depois reescrevemos o mesmo resultado na linguagem de matrizes: a matriz de adjacência $A$ e a matriz não-retroativa $B$ de Hashimoto. O fio condutor é uma pergunta só: \emph{quantos caminhos novos se abrem a cada passo?} No fim, testamos tudo na malha real de Fortaleza e vemos onde essas teorias falham.
+
+Para ler mais: M.~E.~J.~Newman, \emph{Networks} (2ª ed., Oxford, 2018), caps.\ 12 e 15; R.~Cohen \emph{et al.}, Phys.\ Rev.\ Lett.\ \textbf{85}, 4626 (2000); B.~Karrer, M.~E.~J.~Newman e L.~Zdeborová, Phys.\ Rev.\ Lett.\ \textbf{113}, 208702 (2014). Pré-requisitos: séries de potências, autovalores e o handout T1. \pontos{25}
+
+\section{Funções geradoras de graus}
+
+Seja $p_k$ a fração de nós com grau $k$. Toda a informação está na \emph{função geradora}
+\[
+G_0(x) = \sum_{k\ge0} p_k x^k, \qquad G_0(1) = 1,\quad G_0'(1) = \avg{k},\quad G_0''(1) = \avg{k^2}-\avg{k}.
+\]
+
+Agora a pergunta que importa para percolação: se eu \emph{chego} a um nó andando por uma aresta, qual é o grau dele? Não é $p_k$! Um nó de grau $k$ tem $k$ arestas chegando nele, então é $k$ vezes mais provável chegar nele. A probabilidade é $k p_k/\avg k$. Quem chega já usou uma aresta, então sobram $k-1$ arestas ``novas'', o \emph{grau excedente}.
+
+\begin{ideia}
+O grau excedente de um nó alcançado por uma aresta tem distribuição $q_k = (k+1)p_{k+1}/\avg k$, com função geradora
+\[
+G_1(x) = \sum_k q_k x^k = \frac{G_0'(x)}{G_0'(1)}.
+\]
+A média, $G_1'(1) = \dfrac{\avg{k^2}-\avg k}{\avg k}$, é o \textbf{fator de ramificação}: quantos caminhos novos se abrem, em média, a cada passo.
+\end{ideia}
+
+\begin{exemplo}
+Calcule $G_0$ e $G_1$ para (a) a rede regular de grau $z$ e (b) a rede de Erdős--Rényi, cuja distribuição de graus é Poisson com média $c$.
+\end{exemplo}
+\begin{solucao}
+(a) $G_0 = x^z$ e $G_1 = z x^{z-1}/z = x^{z-1}$, com fator de ramificação $z-1$, como na árvore de Bethe. (b) $G_0 = \sum_k e^{-c}c^kx^k/k! = e^{c(x-1)}$, e $G_1 = c\,e^{c(x-1)}/c = G_0$. Para Poisson, o grau excedente tem a mesma distribuição que o grau: o fator de ramificação é $c$.
+\end{solucao}
+
+\problema{2} \textbf{O paradoxo da amizade.} Mostre que o grau médio de um vizinho, $\avg{k}_{\rm viz} = \avg{k^2}/\avg k$, é sempre $\ge\avg k$, com igualdade só se todos os nós tiverem o mesmo grau. Interprete para uma malha viária: por que um cruzamento ``visitado'' por um carro tende a ser maior que um cruzamento típico?
+
+\section{O componente gigante e o critério de Molloy--Reed}
+
+Seja $u$ a probabilidade de que uma aresta \emph{não} leve ao componente gigante, ou seja, de que tudo o que se alcança por ela seja finito. Num grafo sem laços curtos (``localmente árvore''), isso acontece se \emph{todas} as arestas excedentes do nó do outro lado também não levarem ao gigante:
+\[
+u = \sum_k q_k u^k = G_1(u), \qquad S = 1 - G_0(u),
+\]
+onde $S$ é a fração de nós no gigante.
+
+\begin{exemplo}
+Mostre que existe componente gigante se, e só se, $\kappa\equiv\avg{k^2}/\avg{k} > 2$ (critério de Molloy--Reed).
+\end{exemplo}
+\begin{solucao}
+$u=1$ sempre é solução ($G_1(1)=1$) e dá $S=0$. Queremos outra solução em $[0,1)$. $G_1$ tem coeficientes não-negativos, então é crescente e convexa em $[0,1]$, com $G_1(0) = q_0\ge0$. Desenhe $y=G_1(u)$ e $y=u$. Se a inclinação em $u=1$ for $G_1'(1)\le1$, a curva convexa fica acima da reta em todo $[0,1)$, e só $u=1$ é solução. Se $G_1'(1)>1$, a curva cruza a reta por baixo perto de $u=1$, e como $G_1(0)\ge0$ ela precisa cruzar de novo em algum $u^*<1$. Logo existe gigante se, e só se,
+\[
+G_1'(1) = \frac{\avg{k^2}-\avg k}{\avg k} > 1 \iff \avg{k^2} - 2\avg k > 0 \iff \kappa > 2.
+\]
+\end{solucao}
+
+Agora acrescente a percolação: cada aresta está aberta com probabilidade $p$. Uma aresta não leva ao gigante se estiver fechada ou se estiver aberta e o resto for finito:
+\[
+u = 1-p+p\,G_1(u),\qquad S = 1-G_0(1-p+pu).
+\]
+
+\begin{ideia}
+Repetindo o argumento gráfico, o gigante existe se $p\,G_1'(1) > 1$:
+\[
+p_c = \frac{1}{G_1'(1)} = \frac{\avg k}{\avg{k^2}-\avg k} = \frac{1}{\kappa-1}.
+\]
+Para redes livres de escala com $p_k\sim k^{-\gamma}$ e $\gamma<3$, $\avg{k^2}$ diverge e $p_c\to0$: a rede não se quebra com falhas aleatórias (Cohen \emph{et al.}, 2000). Malhas viárias são o extremo oposto: o grau é limitado (quase todo cruzamento tem grau 3 ou 4) e a rede é \emph{plana}.
+\end{ideia}
+
+\problema{3} Para Erdős--Rényi com grau médio $c$ e percolação de ligações com probabilidade $p$:
+\begin{enumerate}
+  \item Mostre que $S = 1-e^{-cpS}$ e que $p_c = 1/c$.
+  \item Expanda para $cp = 1+\varepsilon$ e mostre que $S\approx 2\varepsilon$. Qual é o expoente $\beta$? Compare com a árvore de Bethe do T1.
+\end{enumerate}
+
+\problema{3} \textbf{Ruas em série.} Uma rua com um nó intermediário de grau 2 (por exemplo, uma curva) é formada por duas ligações em série.
+\begin{enumerate}
+  \item Mostre que, para a percolação, um caminho de $m$ ligações em série, sem ramificações, equivale a uma única ligação aberta com probabilidade $p^m$.
+  \item O \texttt{osmnx} ``simplifica'' a malha removendo nós de grau 2 e juntando os trechos. No protocolo de trânsito, se os trechos têm velocidades relativas $r_1,\dots,r_m$, qual $r$ deve ter a via juntada para que a percolação não mude? (Resposta curta.)
+  \item Na distribuição de graus da malha de Fortaleza (tabela abaixo) quase não há nós de grau 2. Por quê?
+\end{enumerate}
+
+\begin{center}
+\begin{tabular}{lccccccc}
+\toprule
+$k$ & 1 & 2 & 3 & 4 & 5 & 6 & 7\\
+\midrule
+$p_k$ (Fortaleza) & 0,068 & 0,053 & 0,396 & 0,430 & 0,032 & 0,016 & 0,004\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\problema{2} Com a tabela acima, a malha de Fortaleza tem $\avg k = 3{,}373$ e $\avg{k^2} = 12{,}355$. Calcule $\kappa$ e o $p_c$ previsto pela fórmula de Molloy--Reed. Compare com o valor medido por simulação na própria malha, $p_c = 0{,}564\pm0{,}002$. Por que o erro é tão grande? (Volte a este problema depois da Seção 4.)
+
+\section{O espectro da matriz de adjacência}
+
+A matriz de adjacência $A$ tem $A_{ij}=1$ se $i$ e $j$ são vizinhos. O elemento $(A^n)_{ij}$ conta os passeios de $n$ passos de $i$ até $j$. Para um grafo conexo, o teorema de Perron--Frobenius garante que o maior autovalor $\lambda_1(A)$ é real e simples e tem autovetor com todas as entradas positivas (a \emph{centralidade de autovetor}). O número de passeios longos cresce como $\lambda_1^n$.
+
+\begin{ideia}
+Linearizando a percolação em torno de ``ninguém conectado'' e contando passeios, obtemos a estimativa $p_c\approx 1/\lambda_1(A)$. Ela é sistematicamente \emph{baixa demais}, porque passeios podem voltar pela aresta de onde vieram: $i\to j\to i$ não abre caminho novo nenhum, mas é contado como se abrisse.
+\end{ideia}
+
+\problema{3} Cotas inferiores para $\lambda_1(A)$. Use o quociente de Rayleigh, $\lambda_1 = \max_{\bm x\ne0}\bm x^{\!\top}\!A\bm x/\bm x^{\!\top}\bm x$, para uma matriz simétrica.
+\begin{enumerate}
+  \item Com $\bm x=\bm 1$, mostre que $\lambda_1\ge\avg k$.
+  \item Usando $\lambda_1(A)^2 = \lambda_1(A^2)$ e $\bm x = \bm 1$, mostre que $\lambda_1\ge\sqrt{\avg{k^2}}$.
+  \item Mostre que uma estrela com $k$ pontas tem $\lambda_1 = \sqrt k$. Conclua que $\lambda_1\ge\sqrt{k_{\max}}$ em qualquer grafo. (Use que o $\lambda_1$ de um subgrafo é no máximo o do grafo.)
+  \item Para Fortaleza, $\lambda_1(A) = 4{,}08$. Calcule $1/\lambda_1(A)$ e compare com o $p_c$ medido.
+\end{enumerate}
+
+\section{A matriz não-retroativa de Hashimoto}
+
+Para eliminar os passeios que voltam pela mesma aresta, trocamos de espaço: em vez de nós, usamos as $2E$ \emph{arestas orientadas} $u\to v$.
+
+\begin{ideia}
+A \textbf{matriz de Hashimoto} $B$ é a matriz $2E\times2E$
+\[
+B_{(u\to v),(w\to x)} = \begin{cases} 1 & \text{se } v = w \text{ e } x\ne u,\\ 0 & \text{caso contrário.}\end{cases}
+\]
+Ela ``continua'' a aresta $u\to v$ para qualquer aresta saindo de $v$, \emph{exceto} a volta $v\to u$. Então $(B^n)$ conta passeios \emph{não-retroativos}. A linha da aresta $u\to v$ tem $k_v - 1$ uns: exatamente o grau excedente.
+\end{ideia}
+
+\textbf{Percolação por troca de mensagens.} Seja $u_{j\to i}$ a probabilidade de que o nó $i$ \emph{não} se conecte ao gigante através do vizinho $j$. Isso acontece se a ligação $ij$ estiver fechada, ou se estiver aberta e $j$ não se conectar ao gigante por nenhum outro vizinho:
+\[
+u_{j\to i} = 1-p+p\prod_{k\in\partial j\setminus i} u_{k\to j}.
+\]
+Escrevendo $u = 1-\delta$ e linearizando para $\delta$ pequeno,
+\[
+\delta_{j\to i} = p\sum_{k\in\partial j\setminus i}\delta_{k\to j} = p\,(B^{\!\top}\bm\delta)_{j\to i}.
+\]
+A solução $\bm\delta=0$ (sem gigante) fica instável quando $p\,\lambda_1(B)>1$:
+\[
+p_c^{\rm MP} = \frac{1}{\lambda_1(B)}.
+\]
+Isso é \emph{exato} em árvores e é a melhor estimativa ``localmente árvore'' em redes esparsas (Karrer, Newman \& Zdeborová, 2014).
+
+\begin{exemplo}
+Calcule $\lambda_1(B)$ e $\lambda_1(A)$ para um anel com $N$ nós e compare as duas estimativas de $p_c$ com o valor exato.
+\end{exemplo}
+\begin{solucao}
+No anel, toda aresta orientada tem exatamente uma continuação não-retroativa: quem anda no sentido horário continua no sentido horário. Então $B$ é uma matriz de permutação (dois ciclos de comprimento $N$, um para cada sentido), e todos os seus autovalores têm módulo 1, logo $\lambda_1(B)=1$ e $p_c^{\rm MP} = 1$. Esse é exatamente o resultado da cadeia 1D do T1: basta um corte para separar. Já $A$ tem $\lambda_1(A)=2$ (todo nó tem grau 2, autovetor $\bm 1$), e a estimativa $1/\lambda_1(A) = 1/2$ está errada por um fator 2. A diferença é inteira devida aos passeios que voltam.
+\end{solucao}
+
+\problema{2} Rede regular. Mostre que, num grafo em que todo nó tem grau $z$, o vetor $\bm 1$ (de dimensão $2E$) é autovetor de $B$ com autovalor $z-1$, e conclua que $p_c^{\rm MP} = 1/(z-1)$, o resultado de Bethe.
+
+\problema{4} \textbf{Ihara--Bass: de $2E$ para $2N$.} A matriz $B$ é enorme, mas seus autovalores (fora $\pm1$) coincidem com os da matriz $2N\times2N$
+\[
+M = \begin{pmatrix} A & I-D\\ I & 0\end{pmatrix},
+\]
+onde $D$ é a matriz diagonal dos graus.
+\begin{enumerate}
+  \item Suponha $M\binom{\bm x}{\bm y} = \lambda\binom{\bm x}{\bm y}$. Mostre que $\bm x = \lambda\bm y$ e que $\left(\lambda^2 I - \lambda A + D - I\right)\bm x = 0$.
+  \item Num grafo $z$-regular, $\bm x=\bm 1$ é autovetor de $A$ com autovalor $z$. Resolva a equação quadrática em $\lambda$ e confira que aparece $\lambda = z-1$.
+  \item Por que essa forma é útil no computador? Compare o tamanho de $M$ e de $B$ para Fortaleza ($N = 2470$, $E=4166$).
+\end{enumerate}
+
+\problema{3} \textbf{Configuração aleatória recupera Molloy--Reed.} Num grafo aleatório com distribuição de graus $p_k$ e sem correlação entre graus vizinhos, argumente que o vetor $\bm v$ com $v_{u\to v} = k_v - 1$ é aproximadamente autovetor de $B$ e que $\lambda_1(B)\approx\avg{k(k-1)}/\avg k = \kappa-1$. Conclua que $p_c^{\rm MP}$ coincide com a fórmula de Molloy--Reed.
+
+\problema{3} \textbf{Onde a teoria quebra.} Na rede quadrada, $\lambda_1(B)\to3$ quando $L\to\infty$ (o cálculo numérico para $L=60$ dá $2{,}992$). Em Fortaleza, $\lambda_1(B) = 2{,}875$.
+\begin{enumerate}
+  \item Calcule $p_c^{\rm MP}$ para os dois casos e compare com os valores exatos/medidos: $1/2$ na rede quadrada e $0{,}564$ em Fortaleza.
+  \item A troca de mensagens supõe que as mensagens que chegam a um nó são independentes. Explique por que um quarteirão (um laço de comprimento 4) viola essa hipótese, e por que o erro é sempre no sentido de \emph{subestimar} $p_c$.
+  \item Monte a tabela das quatro estimativas de $p_c$ para Fortaleza ($1/\lambda_1(A)$, Molloy--Reed, Hashimoto, simulação) e ordene-as. Qual a lição para quem quer usar teoria de redes aleatórias em cidades?
+\end{enumerate}
+
+\begin{obs}
+Em redes muito heterogêneas, o autovetor de $\lambda_1(A)$ fica ``localizado'' em poucos hubs e perde o sentido como centralidade. A versão com $B$ (a \emph{centralidade não-retroativa}) não sofre desse problema: T.~Martin, X.~Zhang e M.~E.~J.~Newman, Phys.\ Rev.\ E \textbf{90}, 052808 (2014). Em malhas viárias, onde o grau é limitado, a localização é bem mais fraca.
+\end{obs}
+
+\solucoes
+
+\sol{1}
+$\avg{k}_{\rm viz} = \sum_k k\cdot kp_k/\avg k = \avg{k^2}/\avg k$, e $\avg{k^2}\ge\avg k^2$ (variância $\ge0$), com igualdade só se a variância for zero. Um carro chega a um cruzamento por uma rua, e cruzamentos com mais ruas recebem mais carros, simplesmente porque têm mais portas de entrada. Por isso as rotatórias e os grandes cruzamentos parecem ``sempre cheios''.
+
+\sol{2}
+(a) O conjunto das arestas abertas forma outro grafo de Erdős--Rényi, com grau médio $cp$. Basta usar as fórmulas sem percolação com $c\to cp$: como $G_0=G_1 = e^{cp(x-1)}$, temos $u = e^{cp(u-1)}$ e $S = 1-G_0(u) = 1-u$. Logo $S = 1-e^{-cpS}$. A curva $1-e^{-cpS}$ é côncava e tem inclinação $cp$ em $S=0$, então existe solução $S>0$ se, e só se, $cp>1$: $p_c = 1/c$.
+(b) Com $e^{-x}\approx1-x+x^2/2$: $S\approx cpS-(cpS)^2/2$. Dividindo por $S$, $S\approx2(cp-1)/(cp)^2\approx2\varepsilon$. Logo $\beta = 1$, igual à árvore de Bethe: as duas são teorias de campo médio.
+
+\sol{3}
+(a) O caminho conecta as pontas se, e só se, as $m$ ligações estiverem abertas: probabilidade $p^m$. (b) A via juntada está aberta no nível $q$ se e só se todos os trechos tiverem $r_i\ge q$, ou seja, se $\min_i r_i \ge q$. Então $r = \min_i r_i$: a rua é tão boa quanto seu pior trecho. No projeto, as velocidades são geradas direto para a via já simplificada, então isso é automaticamente consistente. Com dados reais de GPS por trecho, teríamos de usar o mínimo. (c) Porque o \texttt{osmnx} remove os nós de grau 2 na simplificação. Os que sobram ficam em pontos especiais, como o início de uma via de mão única ou o lugar onde a classe da via muda.
+
+\sol{4}
+$\kappa = 12{,}355/3{,}373 = 3{,}663$ e $p_c^{\rm MR} = 1/(\kappa-1) = 0{,}376$, muito abaixo de $0{,}564$ (erro de 33\%). O motivo são os laços curtos dos quarteirões: veja a solução do Problema 9.
+
+\sol{5}
+(a) $\bm1^{\!\top}A\bm1 = \sum_{ij}A_{ij} = \sum_i k_i = N\avg k$ e $\bm1^{\!\top}\bm1 = N$. (b) $\bm1^{\!\top}A^2\bm1 = \|A\bm1\|^2 = \sum_i k_i^2 = N\avg{k^2}$, então $\lambda_1^2\ge\avg{k^2}$. (c) Na estrela, tome $x_{\rm centro} = \sqrt k$ e $x_{\rm ponta} = 1$: $(A\bm x)_{\rm centro} = k = \sqrt k\cdot\sqrt k$ e $(A\bm x)_{\rm ponta} = \sqrt k = \sqrt k\cdot1$. Como o nó de grau máximo e seus vizinhos contêm uma estrela, $\lambda_1\ge\sqrt{k_{\max}}$. (d) $1/4{,}08 = 0{,}245$, menos da metade do valor medido. Note que $\lambda_1(A) = 4{,}08 > \sqrt{\avg{k^2}} = 3{,}52$: o autovetor se concentra na parte mais densa da malha.
+
+\sol{6}
+$(B\bm1)_{u\to v} = \#\{x\in\partial v: x\ne u\} = z-1$ para toda aresta orientada. Como $B$ é não-negativa e $\bm1$ é positivo, pelo teorema de Perron--Frobenius esse é o maior autovalor: $\lambda_1(B) = z-1$ e $p_c^{\rm MP}=1/(z-1)$.
+
+\sol{7}
+(a) A segunda linha dá $\bm x = \lambda\bm y$. A primeira dá $A\bm x+(I-D)\bm y = \lambda\bm x$. Substituindo $\bm y = \bm x/\lambda$ e multiplicando por $\lambda$: $\lambda A\bm x + (I-D)\bm x = \lambda^2\bm x$, ou seja, $(\lambda^2I-\lambda A+D-I)\bm x = 0$. (b) Com $A\bm1 = z\bm1$ e $D=zI$: $\lambda^2-z\lambda+z-1 = 0$, e $(\lambda-1)(\lambda-(z-1))=0$. As raízes são $\lambda=1$ e $\lambda = z-1$. (c) $M$ é $4940\times4940$ e $B$ é $8332\times8332$. Mais importante, $M$ tem só $2E+2N\approx 13\,300$ entradas não nulas, enquanto $B$ tem $\sum_v k_v(k_v-1)\approx 22\,000$. Com \texttt{scipy.sparse.linalg.eigs}, $M$ é a escolha natural.
+
+\sol{8}
+Sem correlações, o nó $v$ no fim de uma aresta tem grau excedente distribuído como $q_k$, independente de $u$. Então $(B\bm v)_{u\to v} = \sum_{x\in\partial v\setminus u}(k_x-1)$. Essa é uma soma de $k_v-1$ termos, cada um com média $\avg{k-1}_{\rm aresta} = \sum_k (k-1)kp_k/\avg k = \kappa-1$. Logo $(B\bm v)_{u\to v}\approx(\kappa-1)(k_v-1) = (\kappa-1)v_{u\to v}$. Portanto $\lambda_1(B)\approx\kappa-1$ e $p_c^{\rm MP} = 1/(\kappa-1)$, que é Molloy--Reed.
+
+\sol{9}
+(a) Rede quadrada: $p_c^{\rm MP} = 1/3$ contra $1/2$. Fortaleza: $1/2{,}875 = 0{,}348$ contra $0{,}564$. (b) Num quarteirão, as mensagens que chegam a um cruzamento por dois lados diferentes do mesmo quarteirão dependem das \emph{mesmas} ligações (as do outro lado do quarteirão), então são positivamente correlacionadas. A teoria trata como independentes ``rotas'' que, na verdade, compartilham ligações, e conta caminhos redundantes como se fossem novos. Isso superestima a conectividade e, portanto, subestima $p_c$. (c) $1/\lambda_1(A) = 0{,}245 < $ Hashimoto $0{,}348 <$ Molloy--Reed $0{,}376 <$ simulação $0{,}564$. Cada refinamento melhora a estimativa, mas todas as teorias ``localmente árvore'' falham para malhas planas com laços curtos. Em cidades, \textbf{a simulação direta é obrigatória}, e é exatamente o que o pipeline faz. Há um detalhe: Hashimoto ficou um pouco abaixo de Molloy--Reed provavelmente por causa das correlações de grau da malha real e dos efeitos de borda, que o Problema 8 ignora.
+
+\end{document}

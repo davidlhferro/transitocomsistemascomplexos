@@ -26,7 +26,7 @@ def tamanhos_dos_clusters(N, arestas, abertas):
 
 
 def teste_pico_S2_e_robustez(rng):
-    """Pico de S2 = max min(s_a, s_b) (Handout 1, D5) e R = integral de S1."""
+    """Pico de S2 = max min(s_a, s_b) (handout T1, Exemplo 3) e R = integral de S1."""
     for tentativa in range(30):
         if tentativa % 2:
             H = nx.convert_node_labels_to_integers(nx.grid_2d_graph(12, 12))
@@ -56,7 +56,7 @@ def teste_pico_S2_e_robustez(rng):
 
 
 def teste_R_monotono(rng):
-    """Destravar uma via (r -> 1) nunca diminui R (Handout 1, P4d)."""
+    """Destravar uma via (r -> 1) nunca diminui R (handout T1, Problema 7d)."""
     H = malha_sintetica(L=20)
     N = H.number_of_nodes()
     arestas = np.array(list(H.edges()))

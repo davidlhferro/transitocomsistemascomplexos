@@ -1,0 +1,94 @@
+Malha 'fortaleza': N = 2470 cruzamentos, E = 4166 vias, <k> = 3.37
+Calculando edge betweenness (carga estrutural)...
+Simulando 40 dias, orçamento até k = 41 vias (0.98% de E)...
+  dia  1/40: q_c = 0.484, R = 0.499, pico S2 =  761 nós | críticas: Dq_c = +0.419, DR = +0.0977
+  dia  2/40: q_c = 0.324, R = 0.499, pico S2 =  269 nós | críticas: Dq_c = +0.550, DR = +0.0892
+  dia  3/40: q_c = 0.596, R = 0.517, pico S2 =  370 nós | críticas: Dq_c = +0.224, DR = +0.0805
+  dia  4/40: q_c = 0.461, R = 0.499, pico S2 =  594 nós | críticas: Dq_c = +0.005, DR = +0.0927
+  dia  5/40: q_c = 0.464, R = 0.496, pico S2 =  479 nós | críticas: Dq_c = +0.368, DR = +0.0686
+  dia  6/40: q_c = 0.303, R = 0.425, pico S2 =  903 nós | críticas: Dq_c = +0.532, DR = +0.1372
+  dia  7/40: q_c = 0.485, R = 0.516, pico S2 =  469 nós | críticas: Dq_c = +0.309, DR = +0.0726
+  dia  8/40: q_c = 0.518, R = 0.476, pico S2 =  436 nós | críticas: Dq_c = +0.324, DR = +0.0941
+  dia  9/40: q_c = 0.448, R = 0.486, pico S2 =  621 nós | críticas: Dq_c = +0.465, DR = +0.0939
+  dia 10/40: q_c = 0.620, R = 0.541, pico S2 =  188 nós | críticas: Dq_c = +0.265, DR = +0.0635
+  dia 11/40: q_c = 0.465, R = 0.477, pico S2 =  788 nós | críticas: Dq_c = +0.440, DR = +0.1235
+  dia 12/40: q_c = 0.668, R = 0.516, pico S2 =  276 nós | críticas: Dq_c = +0.204, DR = +0.0651
+  dia 13/40: q_c = 0.445, R = 0.495, pico S2 =  682 nós | críticas: Dq_c = +0.429, DR = +0.0676
+  dia 14/40: q_c = 0.513, R = 0.513, pico S2 =  511 nós | críticas: Dq_c = -0.063, DR = +0.0620
+  dia 15/40: q_c = 0.318, R = 0.445, pico S2 =  914 nós | críticas: Dq_c = +0.587, DR = +0.1556
+  dia 16/40: q_c = 0.447, R = 0.483, pico S2 =  691 nós | críticas: Dq_c = +0.258, DR = +0.0869
+  dia 17/40: q_c = 0.517, R = 0.503, pico S2 =  368 nós | críticas: Dq_c = +0.347, DR = +0.0808
+  dia 18/40: q_c = 0.591, R = 0.512, pico S2 =  496 nós | críticas: Dq_c = +0.200, DR = +0.0744
+  dia 19/40: q_c = 0.450, R = 0.510, pico S2 =  314 nós | críticas: Dq_c = +0.475, DR = +0.0805
+  dia 20/40: q_c = 0.374, R = 0.434, pico S2 =  538 nós | críticas: Dq_c = +0.556, DR = +0.1254
+  dia 21/40: q_c = 0.363, R = 0.480, pico S2 =  538 nós | críticas: Dq_c = +0.216, DR = +0.1091
+  dia 22/40: q_c = 0.482, R = 0.471, pico S2 =  394 nós | críticas: Dq_c = +0.259, DR = +0.0993
+  dia 23/40: q_c = 0.520, R = 0.501, pico S2 =  539 nós | críticas: Dq_c = +0.168, DR = +0.0858
+  dia 24/40: q_c = 0.628, R = 0.532, pico S2 =  425 nós | críticas: Dq_c = +0.270, DR = +0.0552
+  dia 25/40: q_c = 0.382, R = 0.451, pico S2 =  765 nós | críticas: Dq_c = +0.466, DR = +0.1284
+  dia 26/40: q_c = 0.538, R = 0.516, pico S2 =  402 nós | críticas: Dq_c = +0.277, DR = +0.0741
+  dia 27/40: q_c = 0.584, R = 0.501, pico S2 =  176 nós | críticas: Dq_c = +0.188, DR = +0.0747
+  dia 28/40: q_c = 0.529, R = 0.507, pico S2 =  661 nós | críticas: Dq_c = +0.406, DR = +0.0852
+  dia 29/40: q_c = 0.521, R = 0.504, pico S2 =  317 nós | críticas: Dq_c = +0.322, DR = +0.0806
+  dia 30/40: q_c = 0.471, R = 0.471, pico S2 =  387 nós | críticas: Dq_c = +0.246, DR = +0.1115
+  dia 31/40: q_c = 0.383, R = 0.466, pico S2 =  529 nós | críticas: Dq_c = +0.270, DR = +0.0925
+  dia 32/40: q_c = 0.422, R = 0.485, pico S2 =  681 nós | críticas: Dq_c = +0.464, DR = +0.1036
+  dia 33/40: q_c = 0.444, R = 0.475, pico S2 =  704 nós | críticas: Dq_c = +0.383, DR = +0.1111
+  dia 34/40: q_c = 0.480, R = 0.482, pico S2 =  730 nós | críticas: Dq_c = +0.058, DR = +0.0975
+  dia 35/40: q_c = 0.585, R = 0.506, pico S2 =  605 nós | críticas: Dq_c = +0.329, DR = +0.0869
+  dia 36/40: q_c = 0.402, R = 0.479, pico S2 =  703 nós | críticas: Dq_c = +0.271, DR = +0.0994
+  dia 37/40: q_c = 0.459, R = 0.478, pico S2 =  717 nós | críticas: Dq_c = +0.427, DR = +0.0822
+  dia 38/40: q_c = 0.463, R = 0.485, pico S2 =  742 nós | críticas: Dq_c = +0.287, DR = +0.0947
+  dia 39/40: q_c = 0.519, R = 0.502, pico S2 =  434 nós | críticas: Dq_c = +0.268, DR = +0.0898
+  dia 40/40: q_c = 0.353, R = 0.445, pico S2 =  894 nós | críticas: Dq_c = +0.455, DR = +0.1401
+
+================ RESULTADOS ================
+<q_c> antes = 0.4754 +- 0.0861 (desvio entre dias)
+<R>   antes = 0.4894 +- 0.0253
+Spearman(betweenness, <r>)          = -0.676
+Jaccard(red bonds, top BC)          = 0.000
+Jaccard(ligações críticas, top BC)  = 0.000
+Jaccard(críticas dia d, dia d+1)    = 0.033
+
+Delta q_c com k = 41 vias (0.98% de E):
+estratégia                            tempo real        plano fixo
+Random                         +0.0019 +- 0.0013  +0.0000 +- 0.0000
+Slowest (brute force)          +0.0777 +- 0.0158  +0.0952 +- 0.0211
+Top betweenness                +0.0790 +- 0.0213  +0.0888 +- 0.0248
+Red bonds (one shot)           +0.1412 +- 0.0136  +0.0259 +- 0.0105
+Critical bonds (iterative)     +0.3231 +- 0.0227  +0.0518 +- 0.0166
+
+Delta R com k = 41 vias (0.98% de E):
+estratégia                            tempo real        plano fixo
+Random                         +0.0031 +- 0.0005  +0.0037 +- 0.0005
+Slowest (brute force)          +0.0260 +- 0.0032  +0.0296 +- 0.0044
+Top betweenness                +0.0526 +- 0.0039  +0.0574 +- 0.0043
+Red bonds (one shot)           +0.0311 +- 0.0028  +0.0105 +- 0.0024
+Critical bonds (iterative)     +0.0928 +- 0.0036  +0.0234 +- 0.0043
+(+- = erro padrão da média sobre os dias)
+
+Plano fixo, Critical bonds (iterative) (10 primeiras):
+   Rua Teresa Cristina                      residential  <r> = 0.49
+   Rua Joaquim Torres                       residential  <r> = 0.52
+   Rua 25 de Março                          residential  <r> = 0.60
+   Rua Antônio Pompeu                       residential  <r> = 0.60
+   Rua Tomás Acioli                         residential  <r> = 0.62
+   Rua Barão de Aracati                     tertiary     <r> = 0.49
+   Rua 25 de Março                          residential  <r> = 0.65
+   Rua João Brígido                         tertiary     <r> = 0.66
+   Rua Henrique Rabelo                      residential  <r> = 0.51
+   Rua General Clarindo de Queiroz          residential  <r> = 0.79
+
+Plano fixo, Top betweenness (10 primeiras):
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+   Rua Padre Valdevino                      primary      <r> = 0.00
+
+Figuras salvas em /home/user/transitocomsistemascomplexos/figuras/  (50 s)

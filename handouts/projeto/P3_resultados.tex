@@ -1,0 +1,171 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{P3}
+\titulo{Resultados em Fortaleza e Roteiro de Defesa}
+
+\begin{document}
+\fazertitulo
+
+Este handout reúne o que o pipeline encontrou na malha real do corredor Benfica--Centro--Aldeota. Ele separa o que os resultados \emph{mostram} do que \emph{não mostram} e prepara a conversa com o Prof.\ José Soares. Os números vêm de \path{resultados/saida_fortaleza.txt}, gerado com:
+\begin{lstlisting}[language=bash]
+bash codigo/recortar_osm.sh ceara-latest.osm.pbf dados/osm/corredor.osm
+python codigo/otimizacao_antes_depois.py --osm-xml dados/osm/corredor.osm
+\end{lstlisting}
+O mapa vem do OpenStreetMap (extrato do Ceará). As velocidades são \textbf{simuladas} pelo modelo do handout P1. Leia P1 e P2 antes. \pontos{12}
+
+\section{A malha}
+
+\begin{center}
+\begin{tabular}{lc}
+\toprule
+Recorte (oeste, sul, leste, norte) & $(-38{,}548;\ -3{,}752;\ -38{,}490;\ -3{,}718)$\\
+Cruzamentos $N$ / vias $E$ & 2470 / 4166\\
+Grau médio, $\avg{k^2}/\avg k$ & 3,37; 3,66\\
+Vias residenciais / terciárias & 2435 / 708\\
+Vias secundárias / primárias / troncais & 207 / 789 / 18\\
+Pontes no mapa completo & 177 (todas entradas de becos)\\
+3-core & vazio\\
+$p_c$ (percolação de ligações, $r$ uniforme) & $0{,}564\pm0{,}002$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+O mapa completo tem redundância: suas únicas pontes são entradas de becos (T3, Problema 1). Toda fragmentação relevante, portanto, vem do congestionamento.
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{fortaleza_fig4_mapa.png}
+\end{center}
+\textit{Um dia simulado. Cinza escuro: vias lentas ($r$ baixo). Azul: as 41 vias de maior betweenness, quase todas no corredor Padre Valdevino / Duque de Caxias / Domingos Olímpio. Laranja: as 41 ligações críticas escolhidas pelo algoritmo guloso nesse dia, espalhadas pela malha e em ruas locais.}
+
+\section{A transição}
+
+\begin{center}
+\begin{minipage}{0.48\textwidth}\centering
+\includegraphics[width=\textwidth]{fortaleza_fig1_transicao.png}
+\end{minipage}\hfill
+\begin{minipage}{0.48\textwidth}\centering
+\includegraphics[width=\textwidth]{fortaleza_fig2_antes_depois.png}
+\end{minipage}
+\end{center}
+
+\begin{itemize}
+  \item $\avg{q_c} = 0{,}475\pm0{,}014$ (erro padrão), com desvio de $0{,}086$ entre dias. O pico de $\avg{S_2}$ chega a $\approx15\%$ de $N$.
+  \item $\avg R = 0{,}489\pm0{,}004$, com desvio de $0{,}025$ entre dias. A robustez flutua muito menos que $q_c$ (relativamente, 5\% contra 18\%).
+  \item Embaralhando as velocidades entre as vias, o esperado seria $F^{-1}(1-p_c) = 0{,}502$. As correlações custam $\approx0{,}03$ de resiliência (um efeito de $\approx2\sigma$; P1, Problema 7).
+\end{itemize}
+
+\section{Antes vs.\ depois}
+
+\begin{center}
+\includegraphics[width=0.95\textwidth]{fortaleza_fig3_orcamento.png}
+\end{center}
+
+Com $k=41$ vias ($0{,}98\%$ de $E$):
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{tempo real} & \multicolumn{2}{c}{plano fixo}\\
+Estratégia & $\Delta q_c$ & $\Delta R$ & $\Delta q_c$ & $\Delta R$\\
+\midrule
+Aleatória & $+0{,}002(1)$ & $+0{,}003(1)$ & $0{,}000(0)$ & $+0{,}004(1)$\\
+Mais lentas & $+0{,}078(16)$ & $+0{,}026(3)$ & $+0{,}095(21)$ & $+0{,}030(4)$\\
+Maior betweenness & $+0{,}079(21)$ & $+0{,}053(4)$ & $+0{,}089(25)$ & $\bm{+0{,}057(4)}$\\
+Red bonds (uma vez) & $+0{,}141(14)$ & $+0{,}031(3)$ & $+0{,}026(11)$ & $+0{,}011(2)$\\
+Ligações críticas & $\bm{+0{,}323(23)}$ & $\bm{+0{,}093(4)}$ & $+0{,}052(17)$ & $+0{,}023(4)$\\
+\bottomrule
+\end{tabular}
+\end{center}
+(O número entre parênteses é o erro padrão nos últimos dígitos: $0{,}323(23)$ significa $0{,}323\pm0{,}023$.)
+
+\begin{ideia}
+\textbf{As três conclusões, em ordem de confiança.}
+\begin{enumerate}
+  \item \emph{Em tempo real}, destravar as ligações críticas é de longe a melhor estratégia. Com menos de 1\% das vias, $q_c$ vai de $0{,}475$ para $0{,}798$. Isso é 4 vezes o ganho do betweenness e da força bruta em $q_c$, e 1,8 e 3,6 vezes, respectivamente, em $R$. (Diferença para o betweenness em $R$: $7{,}6\sigma$.)
+  \item Os gargalos de percolação \emph{não} são as vias importantes do mapa: sobreposição zero com as 41 vias de maior betweenness.
+  \item Os gargalos \emph{evoluem}: a sobreposição entre dias consecutivos é 0,033, cerca de 7 vezes o acaso, mas longe de 1. Num plano fixo, a vantagem desaparece, e quem vence é o betweenness ($\Delta R = 0{,}057$ contra $0{,}023$, $5{,}6\sigma$), porque o corredor de alta betweenness está travado \emph{todos} os dias.
+\end{enumerate}
+\end{ideia}
+
+\section{Onde ficam as vias}
+
+\textbf{Plano fixo, ligações críticas} (as 10 primeiras pela pontuação de Borda): Rua Teresa Cristina, Rua Joaquim Torres, Rua 25 de Março (dois trechos), Rua Antônio Pompeu, Rua Tomás Acioli, Rua Barão de Aracati, Rua João Brígido, Rua Henrique Rabelo e Rua General Clarindo de Queiroz. Quase todas são vias locais ou coletoras, com $\avg r$ entre 0,49 e 0,79.
+
+\textbf{Maior betweenness} (41 trechos): Rua Padre Valdevino (26), Av.\ Duque de Caxias (8), Av.\ Domingos Olímpio (5) e Av.\ Aguanambi (2). Todos com $\avg r\approx0$ no modelo.
+
+\begin{obs}
+Não tire conclusões sobre ruas específicas sem dados reais de velocidade. O modelo concentra a carga num único corredor porque usa roteamento ``tudo ou nada'' (T3, Problema 6). O que os nomes mostram é o \emph{tipo} de via: os gargalos de percolação são ruas locais que ligam bolsões, não avenidas.
+\end{obs}
+
+\section{Sintético vs.\ real}
+
+\begin{center}
+\begin{tabular}{lcc}
+\toprule
+& sintética ($45\times45$) & Fortaleza\\
+\midrule
+$N$ / $E$ / $\avg k$ & 2025 / 3728 / 3,68 & 2470 / 4166 / 3,37\\
+$\avg{q_c}$ / $\avg R$ & 0,622 / 0,603 & 0,475 / 0,489\\
+$\Delta R$, críticas, tempo real & $+0{,}065$ & $+0{,}093$\\
+$\Delta R$, betweenness, tempo real & $+0{,}017$ & $+0{,}053$\\
+$\Delta R$, críticas, plano fixo & $+0{,}023$ & $+0{,}023$\\
+$\Delta R$, betweenness, plano fixo & $+0{,}018$ & $+0{,}057$\\
+Jaccard entre dias consecutivos & 0,019 & 0,033\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\section{O que o trabalho \emph{não} mostra (diga antes que perguntem)}
+
+\begin{enumerate}
+  \item \textbf{As velocidades são simuladas.} A topologia é real, mas $r_e$ vem de um modelo calibrado à mão. As conclusões são sobre o \emph{mecanismo}, não sobre a Fortaleza de hoje. Próximo passo: GPS dos ônibus da Etufor ou dados da AMC.
+  \item \textbf{Grafo não-direcionado.} Usamos conectividade fraca. Com mão única, o certo é usar componentes fortemente conexos.
+  \item \textbf{Sem reroteamento.} A carga vem da betweenness em fluxo livre, sem equilíbrio de Wardrop. Isso exagera a concentração nos corredores.
+  \item \textbf{Destravar = $r\to1$} é um cenário idealizado (o melhor caso para todas as estratégias).
+  \item \textbf{Um único recorte}, sem análise de tamanho finito.
+  \item \textbf{O guloso não é ótimo.} Não sabemos quão longe ele está do ótimo.
+\end{enumerate}
+
+\section{Roteiro de defesa: perguntas prováveis}
+
+\textbf{``Por que definir $q_c$ pelo pico de $S_2$?''} Porque $S_2$ faz o papel da susceptibilidade: tem pico onde os dois maiores clusters, ambos fractais, estão prestes a se fundir (T1, Seção 4). Além disso, o pico é calculado \emph{exatamente} numa única varredura, junto com a ligação que o causa (T1, Exemplo 3). Um critério como $S_1 = N/2$ depende de uma escolha arbitrária e não identifica nenhuma ligação.
+
+\textbf{``O pico de $S_2$ não deveria sumir no limite termodinâmico?''} A fração $S_2^{\max}/N\sim L^{d_f-2} = L^{-5/48}$ vai a zero, mas devagar demais para importar em qualquer cidade real: para $L=50$, ainda é $\approx0{,}66$ vezes a amplitude.
+
+\textbf{``Você achou centenas de pontes, mas Coniglio diz $L^{3/4}$.''} A maioria das pontes segura galhos (\emph{dangling ends}). As red bonds de Coniglio são as pontes do \emph{backbone}, as de massa de corte macroscópica. Essas crescem como $L^{0{,}62}$ no teste, perto de $L^{3/4}$ (T1, Seção 5).
+
+\textbf{``Seu $q_c$ às vezes cai depois de uma melhoria. O código está errado?''} Não. $q_c$ é a posição de um máximo e pode pular entre eventos de fusão (T1, Problema 7). Por isso reportamos também $R$, que é provadamente monótono (testado em 200 tentativas).
+
+\textbf{``Por que as ligações críticas não são as de maior betweenness?''} Porque a criticidade é uma propriedade do grafo \emph{congestionado}. No mapa completo, a ligação crítica é uma rua comum, com desvios. Quando os desvios estão lentos, ela vira ponte entre dois clusters macroscópicos, com betweenness $\sim S_1S_2$ no grafo congestionado (T3, Ideia 4).
+
+\textbf{``Se o plano fixo não funciona, para que serve o método?''} Para o controle adaptativo. O cálculo leva 4 ms. A CTAFOR poderia recalcular as ligações críticas a cada poucos minutos com dados de GPS e priorizar o verde nelas. Para obras e planos fixos, a resposta do modelo é atacar os corredores cronicamente saturados.
+
+\textbf{``Qual é a classe de universalidade?''} A malha é plana e as correlações do modelo são de curto alcance ($\sim2$--3 quarteirões), então esperamos percolação 2D ($\nu=4/3$, $d_f=91/48$). Ainda não verificamos. O teste seria uma análise de tamanho finito com recortes de tamanhos diferentes (Problema 2).
+
+\problema{2} Em vias arteriais de 60 km/h, $q_c = 0{,}475$ corresponde a $28{,}5$ km/h. Dê uma interpretação concreta para um motorista: o que significa ``a cidade se fragmenta em $q_c$''? O que muda, nessa linguagem, quando $q_c$ sobe para $0{,}798$?
+
+\problema{4} \textbf{Desenhe o próximo experimento: tamanho finito em Fortaleza.} Usando recortes concêntricos de lados $L$, $2L$ e $4L$ (por exemplo, centrados na Praça do Ferreira):
+\begin{enumerate}
+  \item Que grandezas você mediria em cada recorte, e que leis de potência espera para cada uma?
+  \item Como estimaria $\nu$ e $d_f$ a partir delas?
+  \item Cite dois motivos pelos quais uma cidade real pode \emph{não} obedecer a essas leis (pense na heterogeneidade dos bairros e no tamanho máximo possível).
+\end{enumerate}
+
+\problema{3} Por que o betweenness funciona muito melhor em Fortaleza ($\Delta R = 0{,}053$ em tempo real) do que na malha sintética ($0{,}017$)? Compare a estrutura das avenidas nas duas malhas.
+
+\problema{3} \textbf{Falsificação.} Proponha um teste que poderia \emph{derrubar} a conclusão 1 da Ideia 1. Por exemplo: o que aconteceria se a intervenção fosse mais realista, $r_e\to r_e+0{,}2$ em vez de $r_e\to1$? E se o orçamento fosse 0,2\% em vez de 1\%? Diga qual resultado você esperaria e qual resultado o deixaria preocupado.
+
+\solucoes
+
+\sol{1}
+$q$ é o nível de exigência. Em $q=0{,}475$, se o motorista só aceita vias que entregam pelo menos 47,5\% da velocidade livre (28,5 km/h numa arterial, 14 km/h numa rua de 30), a cidade se parte em ilhas: não existe rota ``aceitável'' entre a maioria dos pares de bairros. Com $q_c = 0{,}798$, o mesmo motorista conseguiria exigir 80\% da velocidade livre (48 km/h numa arterial) e ainda atravessar a cidade. Na prática: existem rotas fluidas entre quase todos os pares de pontos, mesmo no pico.
+
+\sol{2}
+(a) Para cada recorte: $\avg{q_c}(L)$ e a largura $\delta q_c(L)$ (desvio entre dias); $\avg{S_2^{\max}}(L)$; o número de pontes de massa macroscópica no ponto crítico, $L_{\rm red}(L)$. As previsões são $\avg{q_c}(L)-q_c(\infty)\sim L^{-1/\nu}$, $\delta q_c\sim L^{-1/\nu}$, $S_2^{\max}\sim L^{d_f}$ e $L_{\rm red}\sim L^{1/\nu}$. (b) Inclinações em gráficos log-log: $\delta q_c$ e $L_{\rm red}$ dão $1/\nu$ (duas estimativas independentes, uma para conferir a outra), e $S_2^{\max}$ dá $d_f$. Confira a hiperescala $d_f = 2-\beta/\nu$. (c) Os bairros têm morfologias diferentes (grade regular na Aldeota, traçado irregular no Centro), então aumentar $L$ muda o \emph{tipo} de malha, não só o tamanho. E a cidade é finita: só cabem 2 ou 3 décadas de $L$, pouco para leis de potência limpas. Correções de escala serão grandes.
+
+\sol{3}
+A malha sintética tem avenidas regulares a cada 9 quadras, todas equivalentes: a carga se divide entre várias avenidas paralelas, e destravar 1\% das vias de maior betweenness só abre pedaços de várias delas. Em Fortaleza, poucos corredores longos atravessam o recorte (Padre Valdevino, Duque de Caxias, Domingos Olímpio), e o roteamento ``tudo ou nada'' concentra a carga neles. Destravar o corredor inteiro cria uma ``espinha'' rápida que conecta muitos bolsões em qualquer $q$. Parte desse efeito é real (Fortaleza tem mesmo corredores dominantes), e parte é artefato da falta de reroteamento.
+
+\sol{4}
+Com $r_e\to r_e+0{,}2$, todos os ganhos caem. A pergunta é se a \emph{ordem} das estratégias se mantém. Esperamos que sim: as ligações críticas estão perto de $q_c$ ($\avg r\approx0{,}5$--0,8), então subir 0,2 já as tira da zona crítica, enquanto as vias mais lentas ($r\approx0$) continuariam fechadas com $+0{,}2$. Com 0,2\% de orçamento, esperamos uma vantagem relativa ainda \emph{maior} das ligações críticas, já que o ganho delas é concentrado nas primeiras vias (Fig.\ 3). Ficaria preocupante se, com intervenção parcial, as ligações críticas perdessem para o betweenness também em tempo real: isso indicaria que o ganho vem de abrir ``atalhos perfeitos'' irreais, e não de entender o ponto crítico.
+
+\end{document}

@@ -1,0 +1,285 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T1}
+\titulo{Percolação em Redes}
+
+\begin{document}
+\fazertitulo
+
+Este handout cobre a teoria básica de percolação: o limiar crítico, o parâmetro de ordem, a susceptibilidade, os expoentes críticos, o tamanho finito e as \emph{red bonds}. No fim, tudo é traduzido para a linguagem do trânsito. Para ler mais, a referência padrão são os capítulos 1 a 4 de Stauffer \& Aharony, \emph{Introduction to Percolation Theory}. O artigo que motiva o projeto é D.~Li \emph{et al.}, PNAS \textbf{112}, 669 (2015). Você só precisa de probabilidade básica, séries geométricas e expansões de Taylor.
+
+Os problemas que valem mais pontos são mais difíceis. Tente cada um por pelo menos vinte minutos antes de olhar a solução. \pontos{29}
+
+\section{O que é percolação}
+
+Pegue um tabuleiro quadriculado enorme. Cada aresta (cada ``rua'' entre dois cruzamentos) está \emph{aberta} com probabilidade $p$ e \emph{fechada} com probabilidade $1-p$, independentemente das outras. Existe um caminho de ruas abertas atravessando o tabuleiro?
+
+Com $p$ pequeno, só há ilhas pequenas. Com $p$ perto de $1$, existe um \emph{cluster gigante} ocupando uma fração finita do tabuleiro. Entre os dois existe um valor $p_c$ em que o comportamento muda abruptamente, no limite de tabuleiro infinito. Isto é uma transição de fase, igual à do ímã que perde a magnetização no ponto de Curie, mas puramente \emph{geométrica}: não há energia nem temperatura, só conectividade.
+
+\begin{ideia}
+Na \emph{percolação de ligações} num grafo com $N$ nós, cada aresta é mantida com probabilidade $p$. Os \emph{clusters} são os componentes conexos. Definimos
+\begin{itemize}
+  \item $n_s(p)$: número de clusters finitos de tamanho $s$, \emph{por nó} da rede;
+  \item $S_1$, $S_2$: tamanhos do maior e do segundo maior cluster;
+  \item o \emph{parâmetro de ordem} $P_\infty = \lim_{N\to\infty} S_1/N$, que vale zero para $p<p_c$ e é positivo para $p>p_c$.
+\end{itemize}
+Como todo nó está em algum cluster, $\sum_s s\,n_s + P_\infty = 1$.
+\end{ideia}
+
+A grandeza $s\,n_s$ é a probabilidade de que um nó escolhido ao acaso esteja num cluster finito de tamanho $s$. Isso leva à \emph{susceptibilidade}, o tamanho médio do cluster de um nó escolhido ao acaso (fora do gigante):
+\[
+\chi = \frac{\sum_s s^2 n_s}{\sum_s s\,n_s}.
+\]
+Aparece $s^2$, e não $s$, porque escolher um \emph{nó} ao acaso favorece os clusters grandes. Em $p_c$, $\chi\to\infty$, exatamente como a susceptibilidade magnética no ponto de Curie.
+
+\begin{exemplo}
+Resolva a percolação de ligações numa cadeia infinita (1D): encontre $n_s$, $p_c$, $\chi$ e o comprimento de correlação $\xi$.
+\end{exemplo}
+\begin{solucao}
+Um cluster de exatamente $s$ nós é formado por $s-1$ ligações abertas seguidas, com uma ligação fechada em cada ponta. Ancorando o cluster pelo seu nó mais à esquerda,
+\[
+n_s = (1-p)^2 p^{\,s-1}.
+\]
+Usando $\sum_{s\ge1} s x^{s-1} = (1-x)^{-2}$, temos $\sum_s s\,n_s = 1$ para todo $p<1$: todo nó está num cluster finito. Logo $P_\infty=0$ para $p<1$, ou seja, $p_c = 1$. Em 1D basta uma ligação fechada para cortar tudo.
+
+Com $\sum_{s\ge 1}s^2x^{s-1} = (1+x)/(1-x)^3$,
+\[
+\chi = (1-p)^2\,\frac{1+p}{(1-p)^3} = \frac{1+p}{1-p} \approx \frac{2}{p_c-p},
+\]
+que diverge com expoente $\gamma = 1$. Por fim, dois nós a distância $r$ estão no mesmo cluster com probabilidade $p^r = e^{-r/\xi}$, onde $\xi = -1/\ln p \approx 1/(1-p)$. Então $\xi \sim (p_c-p)^{-\nu}$ com $\nu = 1$.
+\end{solucao}
+
+\problema{2} Na rede quadrada, cada ligação cruza exatamente uma ligação da \emph{rede dual} (cujos nós ficam nos centros das faces). Declare uma ligação dual aberta se a ligação original que ela cruza estiver fechada.
+\begin{enumerate}
+  \item Com que probabilidade as ligações duais estão abertas?
+  \item Num quadrado $L\times L$, argumente que ou existe caminho aberto da esquerda para a direita na rede original, ou existe caminho aberto de cima para baixo na dual, mas nunca os dois. (Desenhe! É o mesmo argumento do jogo \emph{Hex}.)
+  \item Supondo que haja um único limiar, conclua que $p_c = 1/2$.
+\end{enumerate}
+
+\problema{1} A malha sintética do projeto é uma rede quadrada da qual se retiram 8\% das ruas locais. O limiar de ligações dela é maior ou menor que $1/2$? Dê uma estimativa simples.
+
+\section{Campo médio: a árvore de Bethe}
+
+Em redes sem laços, a percolação é exatamente solúvel. A ideia é tratar o cluster como um \emph{processo de ramificação}: cada nó alcançado ``gera filhos'' pelas ligações abertas.
+
+\begin{ideia}
+Numa árvore em que todo nó tem $z$ vizinhos, quem chega a um nó por uma ligação encontra $z-1$ ligações novas. O número médio de filhos é $(z-1)p$. O processo sobrevive para sempre (existe cluster infinito) se, e só se, esse número for maior que $1$:
+\[
+p_c = \frac{1}{z-1}.
+\]
+\end{ideia}
+
+\begin{exemplo}
+Para $z=3$, encontre $P_\infty(p)$ e o expoente $\beta$ definido por $P_\infty \sim (p-p_c)^\beta$.
+\end{exemplo}
+\begin{solucao}
+Seja $t$ a probabilidade de que um \emph{ramo} (uma ligação saindo de um nó numa direção, mais tudo além dela) seja finito. O ramo é finito se a ligação estiver fechada, ou se estiver aberta e os dois sub-ramos seguintes forem finitos:
+\[
+t = (1-p) + p\,t^2 \quad\Longrightarrow\quad t \in \left\{1,\ \frac{1-p}{p}\right\}.
+\]
+Para $p>1/2$, a raiz física é a menor, $t = (1-p)/p$. (Num processo de ramificação a probabilidade de extinção é sempre a menor raiz.) Um nó está no cluster infinito se algum dos seus três ramos for infinito:
+\[
+P_\infty = 1 - t^3 = 1 - \left(\frac{1-p}{p}\right)^3.
+\]
+Com $p = \tfrac12+\varepsilon$: $(1-p)/p \approx 1-4\varepsilon$, então $t^3 \approx 1-12\varepsilon$ e $P_\infty\approx 12\varepsilon$. Portanto $\beta=1$.
+\end{solucao}
+
+\problema{3} Na árvore de Bethe com $p<p_c$, seja $B$ o número médio de nós alcançados por um ramo.
+\begin{enumerate}
+  \item Justifique $B = p\,[1+(z-1)B]$.
+  \item Mostre que $\chi = 1 + zB = \dfrac{1+p}{1-(z-1)p}$ e encontre $\gamma$.
+  \item Confira que, para $z=2$, o resultado coincide com o da cadeia 1D.
+\end{enumerate}
+
+\problema{2} Para a rede quadrada ($z=4$), a fórmula de Bethe dá $p_c = 1/3$, mas o valor exato é $1/2$.
+\begin{enumerate}
+  \item Explique por que uma ligação que fecha um \emph{laço} não aumenta nenhum cluster, e por que isso faz o $p_c$ verdadeiro ser \emph{maior} que a estimativa de árvore.
+  \item Fortaleza tem regiões em grade regular (Aldeota) e regiões irregulares, com muitos becos sem saída. Mantendo a mesma distribuição de velocidades, qual tipo de região deve ser mais resiliente? Cuidado para não confundir com o item anterior.
+\end{enumerate}
+
+\section{Expoentes críticos e leis de escala}
+
+Perto de $p_c$, todas as grandezas viram leis de potência em $\Delta = p-p_c$. Os expoentes são \emph{universais}: dependem só da dimensão e do alcance das correlações, não dos detalhes da rede.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.25}
+\begin{tabular}{lccc}
+\toprule
+Grandeza & Comportamento & 2D & Campo médio \\
+\midrule
+Parâmetro de ordem & $P_\infty\sim\Delta^\beta$ & $5/36$ & $1$ \\
+Susceptibilidade & $\chi\sim|\Delta|^{-\gamma}$ & $43/18$ & $1$ \\
+Comprimento de correlação & $\xi\sim|\Delta|^{-\nu}$ & $4/3$ & $1/2$ \\
+Tamanhos em $p_c$ & $n_s\sim s^{-\tau}$ & $187/91$ & $5/2$ \\
+Tamanho de corte & $s_\xi\sim|\Delta|^{-1/\sigma}$ & $36/91$ & $1/2$ \\
+Dimensão fractal & $S_1(p_c)\sim L^{d_f}$ & $91/48$ & $4$ \\
+Red bonds & $L_{\rm red}\sim L^{1/\nu}$ & $3/4$ & $2$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ideia}
+Os expoentes não são independentes. Todos saem de duas hipóteses de escala:
+\[
+n_s(p) = s^{-\tau} f\!\left(s/s_\xi\right),\quad s_\xi \sim |\Delta|^{-1/\sigma},
+\qquad\text{e}\qquad s_\xi \sim \xi^{d_f}.
+\]
+Daí vêm $\beta = (\tau-2)/\sigma$, $\gamma = (3-\tau)/\sigma$, a hiperescala $d\nu = \gamma+2\beta$ e $d_f = d-\beta/\nu$.
+\end{ideia}
+
+Uma malha viária plana com desordem de curto alcance deve estar na classe da percolação 2D. Correlações de \emph{longo} alcance, decaindo como $r^{-a}$ com $a < 2/\nu = 3/2$, mudam a classe (A.~Weinrib, Phys.\ Rev.\ B \textbf{29}, 387, 1984). No modelo do projeto, o ruído é correlacionado só até alguns quarteirões, então a classe 2D vale.
+
+\problema{2} Use a tabela para verificar a hiperescala em $d=2$ e a relação $d_f = d - \beta/\nu$. Depois justifique $d_f = d-\beta/\nu$: numa caixa de lado $\xi$, a massa do gigante é $P_\infty\,\xi^d$, e essa massa é a de um fractal de tamanho $\xi$.
+
+\problema{3} Deduza $\gamma = (3-\tau)/\sigma$ e $\beta = (\tau-2)/\sigma$ a partir da forma de escala de $n_s$.
+\begin{enumerate}
+  \item Aproxime $\sum_s s^2 n_s$ por uma integral e faça a substituição $x = s/s_\xi$. Mostre que o resultado é proporcional a $s_\xi^{3-\tau}$ (use $2<\tau<3$).
+  \item Para $\beta$: acima de $p_c$, $P_\infty = 1 - \sum_s s\,n_s(p)$, e em $p_c$ vale $\sum_s s\,n_s(p_c) = 1$. Escreva $P_\infty = \sum_s s\,[n_s(p_c) - n_s(p)]$ e estime essa soma do mesmo jeito.
+\end{enumerate}
+
+\section{Tamanho finito e o segundo maior cluster}
+
+Numa cidade finita, de tamanho linear $L$, a transição é suavizada: o que importa é a razão $\xi/L$. A hipótese de escala de tamanho finito diz que
+\[
+\frac{S_1}{N} = L^{-\beta/\nu}\,\mathcal{F}\!\left[(p-p_c)L^{1/\nu}\right],
+\qquad S_2^{\max}\sim L^{d_f},
+\qquad p_c(L)-p_c \sim L^{-1/\nu}.
+\]
+
+\begin{ideia}
+Medir $\chi$ numa simulação é ruidoso e exige separar o gigante à mão. O truque usado por Li \emph{et al.} (vindo de Margolina, Herrmann \& Stauffer, 1982) é olhar o \textbf{segundo maior cluster} $S_2$. Abaixo de $p_c$ todos os clusters são pequenos. Acima, o gigante engole os rivais. \emph{Em} $p_c$, os dois maiores são fractais de tamanho $\sim L^{d_f}$ prestes a se fundir. Por isso $S_2$ tem um pico, e a posição do pico define $p_c$ numa amostra.
+\end{ideia}
+
+Como $S_2^{\max}/N \sim L^{d_f-2} = L^{-5/48}$, o pico decai extremamente devagar com o tamanho da cidade. Para $L=45$, $45^{-5/48}\approx 0{,}67$. Por isso o pico é bem visível mesmo em cidades grandes. Um cuidado: a média dos picos não é o pico da média. A média $\avg{q_c}$ dos picos de cada dia e a posição do pico de $\avg{S_2(q)}$ não precisam coincidir.
+
+\begin{exemplo}
+Adicionamos as ligações uma a uma, juntando clusters. Quando a ligação $e$ junta clusters de tamanhos $s_a\ge s_b$, defina $m_e = s_b$. Mostre que $\max S_2 = \max_e m_e$ e que a ligação que realiza o máximo é a que destrói o pico de $S_2$.
+\end{exemplo}
+\begin{solucao}
+Primeiro, logo antes da fusão existem dois clusters distintos de tamanho $\ge s_b$, então $S_2\ge m_e$ naquele instante. Logo $\max S_2 \ge \max_e m_e$.
+
+Agora veja quando $S_2$ pode diminuir. Sejam $C_1\ge C_2\ge C_3\ge\cdots$ os tamanhos antes de uma fusão:
+\begin{itemize}
+  \item dois clusters fora do top-2 se fundem: os dois maiores continuam lá, e $S_2$ não diminui;
+  \item $C_2$ se funde com um cluster menor: $C_2$ cresce (e se passar $C_1$, o novo $S_2$ é o antigo $C_1\ge C_2$);
+  \item $C_1$ se funde com um cluster que não é $C_2$: $S_2$ não muda;
+  \item $C_1$ se funde com $C_2$: o novo $S_2$ é $C_3\le C_2$. \textbf{Só aqui $S_2$ pode cair.}
+\end{itemize}
+Ao final o grafo está todo conectado e $S_2=0$, então o pico precisa ser destruído por uma fusão do último tipo, na qual $m_e = C_2 = S_2^{\max}$. Logo $\max S_2 = \max_e m_e$.
+\end{solucao}
+
+Este resultado é o coração do código do projeto: basta \emph{uma linha} dentro do laço de união dos clusters para achar o pico exato de $S_2$ e a \emph{ligação crítica} que o destrói. Os detalhes estão no handout P2.
+
+\problema{4} \textbf{Um paradoxo.} Considere três cadeias de nós:
+\begin{itemize}
+  \item $A$: $a_1-a_2-a_3-a_4-a_5$, com $r(a_5a_4)=0{,}99$, $r(a_4a_3)=0{,}98$, $r(a_3a_2)=0{,}97$, $r(a_2a_1)=0{,}96$;
+  \item $B$: $b_1-\cdots-b_5$, com $r(b_1b_2)=0{,}99$, $r(b_2b_3)=0{,}98$, $r(b_3b_4)=0{,}97$, $r(b_4b_5)=0{,}96$;
+  \item $C$: $c_1-c_2-c_3-c_4$, com $r = 0{,}99$, $0{,}98$, $0{,}97$;
+\end{itemize}
+e duas ligações extras, $e = a_5b_1$ com $r_e = 0{,}80$ e $f = b_5c_1$ com $r_f = 0{,}50$. As ligações entram em ordem decrescente de $r$, e a ligação está aberta no nível $q$ se $r\ge q$.
+\begin{enumerate}
+  \item Calcule $\max S_2$ e $q_c$.
+  \item ``Destrave'' a via $e$, fazendo $r_e\to 1$. Recalcule $\max S_2$ e $q_c$.
+  \item Mostre que $S_1(q)$ não diminuiu para nenhum $q$.
+  \item Prove em geral que aumentar o $r$ de qualquer conjunto de vias nunca diminui $S_1(q)$. Conclua que a robustez
+  \[ R = \frac1N\int_0^1 S_1(q)\,\dd q \]
+  (C.~M.~Schneider, A.~A.~Moreira, J.~S.~Andrade Jr., S.~Havlin e H.~J.~Herrmann, PNAS \textbf{108}, 3838, 2011) é monótona, enquanto $q_c$ não é.
+\end{enumerate}
+
+\section{Red bonds}
+
+\begin{ideia}
+Uma \emph{red bond} (Coniglio, 1982) é uma ligação \emph{singularmente conectada} do cluster crítico: todo caminho entre dois pontos distantes do cluster passa por ela. Toda red bond é uma \emph{ponte} do cluster, mas nem toda ponte é red bond: o cluster crítico está cheio de galhos pendurados (\emph{dangling ends}), presos por uma única ligação. Para distinguir as duas coisas, usamos a \textbf{massa de corte} de cada ponte, que é o tamanho do pedaço \emph{menor} que se solta quando ela é cortada.
+\end{ideia}
+
+O resultado central é que o número de red bonds cresce como $L^{1/\nu} = L^{3/4}$, bem mais devagar que o número de vias, $\sim L^2$. A fração de vias que seguram a conectividade global vai a zero. Essa é a justificativa física do projeto: \emph{poucas vias controlam a conectividade no ponto crítico}.
+
+Um teste numérico na rede quadrada com $r$ uniforme, com média de 20 amostras no pico de $S_2$:
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$L$ & massa do cluster crítico & total de pontes & pontes com massa de corte $>10\%$ \\
+\midrule
+20 & 255 & 135 & 20,8 \\
+40 & 1017 & 492 & 31,9 \\
+razão & $2^{2{,}0}$ & $2^{1{,}87}$ & $2^{0{,}62}$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+O total de pontes cresce aproximadamente como a massa, porque é dominado pelos galhos. As pontes ``macroscópicas'' crescem como $L^{0{,}62}$, perto do $L^{3/4}$ previsto. Com $L$ tão pequeno, correções de escala são esperadas.
+
+\problema{5} \textbf{O argumento de Coniglio.} Seja $\Pi_L(p)$ a probabilidade de existir um caminho aberto atravessando um quadrado $L\times L$. Uma ligação é \emph{pivotal} numa configuração se mudar o estado dela muda o resultado (atravessa ou não). Admita a \emph{fórmula de Russo}: para eventos crescentes,
+\[
+\frac{\dd\Pi_L}{\dd p} = \avg{\#\,\text{ligações pivotais}}.
+\]
+\begin{enumerate}
+  \item Mostre que ser pivotal não depende do estado da própria ligação, e conclua que $\avg{\#\,\text{pivotais abertas}} = p\,\avg{\#\,\text{pivotais}}$.
+  \item Argumente que, quando o quadrado é atravessado, as pivotais abertas são exatamente as red bonds do cluster que atravessa.
+  \item Por escala de tamanho finito, $\Pi_L(p) = \Phi\!\left[(p-p_c)L^{1/\nu}\right]$. Conclua que $\avg{L_{\rm red}}\sim L^{1/\nu}$.
+  \item Estime o número de red bonds na malha sintética do projeto ($L=45$, $E\approx 3700$ vias) e compare com o orçamento de 1\% das vias.
+\end{enumerate}
+
+\section{Do trânsito à percolação}
+
+No protocolo de Li \emph{et al.}, cada via tem velocidade relativa $r_e = v_e/v_e^{\rm livre}\in[0,1]$, e a via está aberta no nível $q$ se $r_e\ge q$. Subir $q$ é o mesmo que diminuir $p$: fechamos as vias da mais lenta para a mais rápida. O pico de $S_2(q)$ define $q_c$. Quanto \emph{maior} $q_c$, mais exigente pode ser o motorista com a cidade ainda conectada.
+
+\begin{ideia}
+Se os $r_e$ forem independentes e tiverem distribuição acumulada $F(q) = \Pr(r_e\le q)$, a fração de vias abertas é $p(q) = 1-F(q)$. A cidade está no limiar quando $p(q_c) = p_c$:
+\[
+q_c = F^{-1}(1-p_c).
+\]
+Na rede quadrada, $q_c$ é a \emph{mediana} de $r$. Se $r=h(x)$ com $h$ decrescente, a mediana de $r$ é $h(\text{mediana de }x)$, porque quantis comutam com funções monótonas. A média não comuta (desigualdade de Jensen).
+\end{ideia}
+
+Na cidade real os $r_e$ são correlacionados (o congestionamento se espalha), e o desvio de $q_c$ em relação a $F^{-1}(1-p_c)$ mede o efeito dessas correlações.
+
+\problema{3} Considere o modelo de uma classe de via, sem correlações:
+\[
+r = \frac{1}{1+\alpha x^4},\qquad x = \bar x\,e^{\sigma\eta-\sigma^2/2},\qquad \eta\sim\mathcal N(0,1).
+\]
+\begin{enumerate}
+  \item Mostre que $\avg{e^{\sigma\eta-\sigma^2/2}}=1$. Por que o termo $-\sigma^2/2$ é fisicamente necessário?
+  \item Mostre que $q_c = \left[1+\alpha\bar x^4 e^{4\sigma\Phi^{-1}(p_c)-2\sigma^2}\right]^{-1}$, onde $\Phi$ é a distribuição acumulada da normal padrão.
+  \item Calcule $q_c$ para $\alpha=0{,}15$, $\bar x = 1{,}5$, $\sigma=0{,}5$, com $p_c=0{,}5$ e com $p_c=0{,}55$. Use $\Phi^{-1}(0{,}55)\approx 0{,}1257$.
+  \item Se a demanda sobe 10\%, quanto cai $q_c$ (com $p_c=0{,}5$)? Por que a queda é tão grande?
+  \item Aumentar $\sigma$ mantendo a carga média aumenta ou diminui $q_c$ (com $p_c=1/2$)? Isso é intuitivo?
+\end{enumerate}
+
+\problema{4} Ainda no modelo do problema anterior, suponha agora que os $r_e$ sejam espacialmente correlacionados: vias vizinhas tendem a estar lentas ou rápidas juntas. Sem fazer contas, argumente se isso deve aumentar ou diminuir o $q_c$ medido em relação a $F^{-1}(1-p_c)$, e também a largura da transição. \emph{Dica:} pense em ``manchas'' de vias rápidas de tamanho $\ell$ e em quantas delas é preciso juntar para atravessar a cidade.
+
+\solucoes
+
+\sol{1}
+(a) $1-p$. (b) Um caminho dual de cima a baixo cruza apenas ligações originais fechadas, e por isso separa a esquerda da direita. Reciprocamente, se não existe travessia horizontal, a fronteira do conjunto de nós alcançáveis a partir da esquerda forma um caminho dual aberto de cima a baixo. Num retângulo, exatamente uma das duas travessias acontece (como no Hex, alguém sempre ganha e nunca os dois). (c) No quadrado, as duas travessias têm a mesma probabilidade quando $p=1-p$. Se fosse $p_c<1/2$, para $p_c<p<1/2$ a travessia original seria quase certa e, como a dual tem probabilidade $1-p>1/2>p_c$, a dual também seria, o que contradiz (b). O caso $p_c>1/2$ é análogo. Logo $p_c=1/2$ (Sykes \& Essam, 1964; a prova rigorosa é de Kesten, 1980).
+
+\sol{2}
+Maior. Ruas removidas não conectam nada, então cada rua restante precisa ficar aberta com probabilidade maior para compensar. Na aproximação mais simples, uma ligação da rede quadrada original está aberta com probabilidade efetiva $\approx 0{,}92\,p$ (as avenidas não foram removidas, então o fator real fica um pouco acima de $0{,}92$), e precisamos de $0{,}92\,p\gtrsim 1/2$, ou seja, $p_c\approx 0{,}54$.
+
+\sol{3}
+(a) A ligação precisa estar aberta (probabilidade $p$). Aí ganhamos o nó vizinho, mais os $z-1$ sub-ramos dele, cada um com média $B$. (b) $B = p/[1-(z-1)p]$, então $\chi = 1+zB = \dfrac{1-(z-1)p+zp}{1-(z-1)p} = \dfrac{1+p}{1-(z-1)p}$, que diverge como $(p_c-p)^{-1}$: $\gamma=1$. (c) Com $z=2$, $\chi=(1+p)/(1-p)$, igual ao exemplo 1. Uma cadeia é uma árvore de Bethe com $z=2$.
+
+\sol{4}
+(a) Numa árvore, toda ligação aberta conecta um nó novo. Numa rede com laços, uma ligação pode ligar dois nós que já estavam no mesmo cluster, e aí ela é redundante para a conectividade. São necessárias mais ligações abertas para atingir a mesma conectividade, e $p_c$ sobe. No algoritmo de Newman--Ziff, são as ligações em que os dois extremos já têm a mesma raiz. (b) A grade. Lá comparamos redes com o \emph{mesmo} $z$, e aqui o que muda é o grau. Uma região com muitos becos tem $\avg k$ baixo e estrutura de árvore: cada beco pende de uma ponte, e uma única via lenta desconecta tudo além dela. A grade tem $\avg k\approx4$ e caminhos alternativos, então seu $p_c$ é menor e, por $q_c=F^{-1}(1-p_c)$, seu $q_c$ é maior.
+
+\sol{5}
+Hiperescala: $\gamma+2\beta = \tfrac{43}{18}+\tfrac{5}{18} = \tfrac83 = 2\cdot\tfrac43$. Dimensão fractal: $\beta/\nu = \tfrac{5}{36}\cdot\tfrac34 = \tfrac5{48}$, então $d_f = 2-\tfrac5{48} = \tfrac{91}{48}$. Justificativa: $P_\infty\xi^d\sim\xi^{d_f}$, e $P_\infty\sim\Delta^\beta\sim\xi^{-\beta/\nu}$, logo $d_f = d-\beta/\nu$.
+
+\sol{6}
+(a) $\sum_s s^2 n_s \approx \int_1^\infty s^{2-\tau} f(s/s_\xi)\,\dd s = s_\xi^{3-\tau}\int_{1/s_\xi}^\infty x^{2-\tau}f(x)\,\dd x$. Como $\tau<3$, a integral converge em $x\to0$ quando $s_\xi\to\infty$, e $f$ corta rápido para $x\gg1$. Logo $\chi\sim s_\xi^{3-\tau} = |\Delta|^{-(3-\tau)/\sigma}$. (b) $P_\infty = \int s^{1-\tau}[f(0)-f(s/s_\xi)]\,\dd s = s_\xi^{2-\tau}\int x^{1-\tau}[f(0)-f(x)]\,\dd x$. A integral converge em $x\to0$ porque $f(0)-f(x)\to0$, e em $x\to\infty$ porque $\tau>2$. Logo $P_\infty\sim s_\xi^{2-\tau} = \Delta^{(\tau-2)/\sigma}$.
+
+\sol{7}
+(a) As cadeias crescem um nó por vez ($m=1$). Em $q=0{,}80$, $e$ funde $A$ (5 nós) com $B$ (5 nós): $m_e=5$. Em $q=0{,}50$, $f$ funde $A\cup B$ (10) com $C$ (4): $m_f=4$. Então $\max S_2 = 5$ e $q_c=0{,}80$.
+(b) Com $r_e=1$, $e$ entra primeiro e junta $a_5$ e $b_1$ ($m=1$). Depois $A\cup B$ cresce um nó por vez pelas duas pontas ($m=1$). Em $q=0{,}50$, $f$ funde 10 com 4. Agora $\max S_2 = 4$ e $q_c = 0{,}50$: \emph{caiu} de $0{,}80$ para $0{,}50$.
+(c) Para $q\le 0{,}80$ nada mudou. Para $q\in(0{,}80;\,0{,}99]$, antes $S_1\le5$, e depois $S_1$ chega a $10$. A rede melhorou, mas o estimador ``posição do pico'' pulou para outro evento de fusão.
+(d) Aumentar $r_e$ só acrescenta arestas ao conjunto $\{e: r_e\ge q\}$, para todo $q$. Acrescentar arestas nunca diminui o maior componente. Então $S_1(q)$ é não-decrescente ponto a ponto, e a integral $R$ também. Já $q_c$ é um \emph{argmax}, que pode pular de forma descontínua. Por isso o projeto reporta $\Delta q_c$ (o observável de Li \emph{et al.}) e também $\Delta R$ (monótono).
+
+\sol{8}
+(a) Ser pivotal compara as configurações ``aberta'' e ``fechada'' com todo o resto igual. É uma função só das outras ligações, e portanto independente do estado da própria ligação: $\Pr(\text{pivotal e aberta}) = p\Pr(\text{pivotal})$. Some sobre as ligações. (b) Se há travessia e a ligação é pivotal e aberta, fechá-la destrói toda travessia, então ela está em todo caminho que atravessa: é uma red bond. Reciprocamente, uma red bond aberta é pivotal. (c) $\dd\Pi_L/\dd p = \Phi'(0)L^{1/\nu}$ em $p_c$, então $\avg{L_{\rm red}} = p_c\,\dd\Pi_L/\dd p\sim L^{1/\nu}=L^{3/4}$. (d) $45^{3/4}\approx17$ red bonds, a menos de uma constante de ordem 1. Isso é $\approx 0{,}5\%$ de 3700, da mesma ordem que o orçamento de 1\%. É consistente com o ganho rápido do método iterativo nos primeiros $\sim 0{,}3\%$ do orçamento.
+
+\sol{9}
+(a) A função geradora de momentos da normal dá $\avg{e^{\sigma\eta}} = e^{\sigma^2/2}$. Sem o termo $-\sigma^2/2$, aumentar o ruído aumentaria a carga média, misturando ``mais carros'' com ``mais flutuação''. (b) $r$ é decrescente em $\eta$, então $r\le q\iff\eta\ge\eta^*$ e $F(q)=1-\Phi(\eta^*)$. A condição $F(q_c)=1-p_c$ dá $\eta^* = \Phi^{-1}(p_c)$. Substitua $x^4 = \bar x^4 e^{4\sigma\eta^*-2\sigma^2}$. (c) Com $p_c=0{,}5$: $x^*=1{,}5\,e^{-0{,}125}=1{,}324$, $\alpha x^{*4}=0{,}461$ e $q_c = 0{,}685$. Com $p_c=0{,}55$: $x^*=1{,}410$, $\alpha x^{*4} = 0{,}592$ e $q_c = 0{,}628$. (d) Com $\bar x = 1{,}65$: $q_c = 0{,}597$, uma queda de $0{,}088$ ($\approx13\%$) para 10\% a mais de demanda. A causa é o expoente $4$ da função BPR: $\dd q_c/\dd\ln\bar x = -4q_c(1-q_c)\approx-0{,}86$. (e) Com $p_c=1/2$, $\eta^*=0$ e $x^{*4}\propto e^{-2\sigma^2}$, então $q_c$ \emph{aumenta}. Com a média fixa, uma log-normal mais larga tem mediana menor: a média é puxada por poucas vias muito carregadas. O $q_c$ responde aos quantis, não à média.
+
+\sol{10}
+Com manchas correlacionadas de tamanho $\ell$, a rede se comporta, em escalas maiores que $\ell$, como uma percolação de ``blocos'' de lado $\ell$. Há duas consequências. (i) A transição fica mais larga e mais ruidosa de amostra para amostra: o tamanho efetivo do sistema cai de $L$ para $L/\ell$, e a janela crítica tem largura $\sim(L/\ell)^{-1/\nu}$. É por isso que o $q_c$ de um único dia flutua tanto no projeto (desvio de $\approx 0{,}09$ entre dias em Fortaleza). (ii) O deslocamento de $q_c$ em relação a $F^{-1}(1-p_c)$ depende de como a correlação age nos quantis relevantes, e não há uma resposta universal sem contas. A forma honesta de responder é numérica: rode o modelo com o ruído espacial desligado (\texttt{FRAC\_CORRELACIONADA = 0}), com a mesma distribuição marginal de $r$, e compare os dois valores de $q_c$.
+
+\end{document}

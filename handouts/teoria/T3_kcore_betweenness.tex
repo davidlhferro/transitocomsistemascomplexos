@@ -1,0 +1,166 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T3}
+\titulo{$k$-Cores, Betweenness e Controle de Transições}
+
+\begin{document}
+\fazertitulo
+
+Os handouts T1 e T2 perguntaram \emph{quando} a rede se quebra. Este pergunta \emph{onde} ela se quebra e o que podemos fazer a respeito. Três ferramentas aparecem: a decomposição em $k$-cores (quais partes da rede têm redundância), a centralidade de intermediação, ou \emph{betweenness} (por onde o fluxo passa), e as estratégias de controle (quais ligações proteger). O resultado mais importante para o projeto está na Ideia~4: os gargalos de percolação são uma propriedade da rede \emph{congestionada}, não do mapa.
+
+Para ler mais: M.~Barthelemy, \emph{Spatial networks}, Phys.\ Rep.\ \textbf{499}, 1 (2011); S.~N.~Dorogovtsev, A.~V.~Goltsev e J.~F.~F.~Mendes, Phys.\ Rev.\ Lett.\ \textbf{96}, 040601 (2006); U.~Brandes, J.\ Math.\ Sociol.\ \textbf{25}, 163 (2001); C.~M.~Schneider \emph{et al.}, PNAS \textbf{108}, 3838 (2011). \pontos{19}
+
+\section{Decomposição em $k$-cores}
+
+\begin{ideia}
+O \textbf{$k$-core} de um grafo é o maior subgrafo em que todo nó tem pelo menos $k$ vizinhos \emph{dentro do subgrafo}. Para achá-lo, faça a \textbf{poda}: remova todos os nós com grau $<k$, recalcule os graus e repita até não sobrar nada para remover. A \emph{coreness} de um nó é o maior $k$ para o qual ele pertence ao $k$-core. A poda custa $O(E)$.
+\end{ideia}
+
+O 2-core é a rede sem os ``galhos de árvore'' (becos e ruas sem saída que só se ligam ao resto por um lado). O 3-core exige que todo cruzamento tenha três saídas \emph{dentro} do núcleo.
+
+\begin{exemplo}
+Encontre o 3-core de uma grade quadrada finita $L\times L$ e o de uma grade com bordas periódicas (um toro).
+\end{exemplo}
+\begin{solucao}
+Na grade finita, os quatro cantos têm grau 2 e são podados. Com isso, os vizinhos de cada canto, que estavam na borda com grau 3, passam a ter grau 2 e também caem. A poda ``descasca'' a borda inteira, e a borda seguinte fica exposta com o mesmo problema. A cascata come a grade toda: \textbf{o 3-core é vazio}. No toro não há bordas, todo nó tem grau 4, e o 4-core é o grafo inteiro. Conferido no computador: grade $30\times30$, 3-core com 0 nós; toro $30\times30$, 4-core com 900 nós.
+\end{solucao}
+
+A malha de Fortaleza se comporta como a grade finita: das 2470 interseções, 2293 têm coreness 2, 177 têm coreness 1, e o 3-core é vazio. Há exatamente 177 pontes na malha.
+
+\problema{2}
+\begin{enumerate}
+  \item Mostre que toda aresta que não está no 2-core é uma ponte.
+  \item Dê um exemplo de ponte \emph{dentro} do 2-core.
+  \item Em Fortaleza, o número de pontes (177) é igual ao número de nós de coreness 1 (177). Explique a coincidência. O que ela diz sobre pontes como as do item (b)?
+\end{enumerate}
+
+\problema{2} \textbf{Por que malhas viárias têm cores pequenos.} Para um grafo plano simples e conexo com $N\ge3$ nós, a fórmula de Euler implica $E\le3N-6$.
+\begin{enumerate}
+  \item Mostre que todo grafo plano tem um nó de grau $\le5$.
+  \item Conclua que o 6-core de qualquer grafo plano é vazio.
+  \item Por que a malha viária, que é \emph{quase} plana, tem um núcleo ainda menor que esse limite?
+\end{enumerate}
+
+\begin{exemplo}
+\textbf{Percolação de $k$-core na árvore de Bethe.} Numa árvore com $z=4$, cada nó está presente com probabilidade $p$. Encontre o limiar e o tamanho do 3-core no limiar.
+\end{exemplo}
+\begin{solucao}
+Seja $Q$ a probabilidade de que um nó alcançado por uma aresta esteja presente e tenha pelo menos $k-1 = 2$ dos seus $z-1=3$ outros vizinhos também ``sustentados'' (com a mesma propriedade, recursivamente):
+\[
+Q = p\left[\binom32Q^2(1-Q)+Q^3\right] = p\,(3Q^2-2Q^3).
+\]
+Além de $Q=0$, existe solução se $1/p = 3Q-2Q^2$ tiver raiz. O lado direito tem máximo $9/8$ em $Q = 3/4$, então
+\[
+p_c = \frac89, \qquad Q(p_c) = \frac34.
+\]
+Um nó está no 3-core se estiver presente e tiver pelo menos 3 dos 4 vizinhos sustentados:
+\[
+M = p\left[4Q^3(1-Q)+Q^4\right] \;\xrightarrow{\,p=p_c\,}\; \frac89\cdot\frac{189}{256} = \frac{21}{32}\approx0{,}66.
+\]
+O 3-core \emph{salta} de 0 para 66\% da rede em $p_c$. A transição é \textbf{descontínua}, ao contrário da percolação comum, em que o gigante nasce do zero.
+\end{solucao}
+
+\problema{3} Ainda no exemplo acima, expanda $3Q-2Q^2$ em torno de $Q=3/4$ e mostre que, logo acima do limiar, $Q-\tfrac34\propto(p-p_c)^{1/2}$. A transição tem um salto \emph{e} uma singularidade de raiz quadrada: por isso se chama \emph{híbrida}. Por que esse tipo de transição é perigoso para infraestruturas?
+
+\begin{obs}
+Como o 3-core de Fortaleza é vazio, a percolação de $k$-core com $k\ge3$ não é o mecanismo certo para o trânsito daqui. O que importa é a percolação comum, que acontece no 2-core.
+\end{obs}
+
+\section{Betweenness: por onde o fluxo passa}
+
+\begin{ideia}
+A \textbf{edge betweenness} de uma aresta $e$ é
+\[
+\mathrm{BC}(e) = \sum_{s<t}\frac{\sigma_{st}(e)}{\sigma_{st}},
+\]
+onde $\sigma_{st}$ é o número de caminhos mínimos de $s$ a $t$ e $\sigma_{st}(e)$ é o número desses caminhos que usam $e$. Se cada par de nós troca uma unidade de fluxo pelo caminho mais rápido, $\mathrm{BC}(e)$ é a carga na via. O algoritmo de Brandes calcula tudo com uma busca a partir de cada nó: $O(NE)$ sem pesos, $O(NE+N^2\log N)$ com pesos.
+\end{ideia}
+
+\begin{exemplo}
+Calcule a betweenness da aresta entre os nós $i$ e $i+1$ de um caminho com $N$ nós. Generalize para uma \emph{ponte} qualquer.
+\end{exemplo}
+\begin{solucao}
+No caminho, só há uma rota entre dois nós. A aresta $(i,i+1)$ é usada exatamente pelos pares com um nó em $\{1,\dots,i\}$ e o outro em $\{i+1,\dots,N\}$: $\mathrm{BC} = i(N-i)$. (Para $N=10$: $9,16,21,24,25,24,21,16,9$.) Para uma ponte que separa o grafo em lados de tamanhos $s$ e $N-s$: todo par com um nó em cada lado precisa passar por ela, e nenhum par do mesmo lado passa (um caminho simples não pode cruzar a ponte e voltar). Logo
+\[
+\mathrm{BC}(\text{ponte}) = s(N-s).
+\]
+\end{solucao}
+
+\begin{ideia}
+\textbf{Esta é a chave do projeto.} Uma ligação crítica é uma ponte do grafo \emph{congestionado} (só com as vias de $r\ge q_c$), separando dois clusters de tamanhos $\sim S_1$ e $\sim S_2$. Nesse grafo, a betweenness dela é $\sim S_1S_2$, gigantesca. Mas no \emph{mapa completo}, com todas as vias, ela é uma rua residencial comum, com muitos desvios em volta e betweenness baixa. A criticidade nasce da combinação ``topologia + quais vias estão lentas hoje''. Por isso, no projeto, a sobreposição entre as ligações críticas e as vias de maior betweenness do mapa é \textbf{zero}, tanto na malha sintética quanto em Fortaleza.
+\end{ideia}
+
+\problema{2} Numa grade $L\times L$, estime como a betweenness da aresta mais central cresce com $L$. \emph{Dica:} quantos pares de nós precisam cruzar a linha vertical do meio, e por quantas arestas eles podem cruzar?
+
+\problema{3} \textbf{Betweenness por amostragem.} O projeto calcula a betweenness usando só $k=500$ origens sorteadas, em vez de todas as $N$. Seja $\delta_s(e) = \sum_t \sigma_{st}(e)/\sigma_{st}$ a contribuição da origem $s$. O estimador é $\widehat{\mathrm{BC}}(e) = \dfrac{N}{k}\sum_{s\in\mathcal S}\delta_s(e)$, onde $\mathcal S$ é a amostra.
+\begin{enumerate}
+  \item Mostre que $\widehat{\mathrm{BC}}$ é não-enviesado: $\mathbb E[\widehat{\mathrm{BC}}(e)] = \sum_s\delta_s(e)$. (Cuidado com o fator 2 de contar cada par duas vezes; ele não muda a resposta, só a normalização.)
+  \item Por que, no projeto, o fator $N/k$ nem importa?
+\end{enumerate}
+
+\problema{2} Em Fortaleza, das 41 vias de maior betweenness, 26 são trechos da Rua Padre Valdevino, 8 da Av.\ Duque de Caxias, 5 da Av.\ Domingos Olímpio e 2 da Av.\ Aguanambi. No modelo, a velocidade média desses trechos é $\avg r\approx0$.
+\begin{enumerate}
+  \item Por que a betweenness se concentra num único corredor?
+  \item Na cidade real, motoristas desviam de vias congestionadas (equilíbrio de Wardrop). O que isso faria com essa concentração? Seja honesto sobre o que isso significa para o modelo.
+\end{enumerate}
+
+\section{Controle de transições}
+
+O congestionamento é como um ``ataque'' natural à rede: ele remove as vias mais lentas primeiro. Proteger a rede contra ataques é um tema clássico. Schneider, Moreira, Andrade, Havlin e Herrmann (2011) mostraram que trocar poucas ligações pode deixar uma rede muito mais robusta contra ataques aos nós mais importantes, e propuseram a medida $R = \frac1N\int S_1$. Morone e Makse (Nature \textbf{524}, 65, 2015) mostraram que o conjunto mínimo de nós que destrói o gigante (a \emph{percolação ótima}) não é o dos nós de maior grau nem o dos de maior betweenness.
+
+\begin{ideia}
+O projeto resolve o problema dual. Dado o ataque natural do congestionamento, quais $k$ vias ``imunizar'' (fazer $r_e\to1$) para que a rede resista até o maior $q$ possível? Encontrar o conjunto ótimo é um problema combinatório difícil. O método do projeto é \textbf{guloso e iterativo}: ache a ligação crítica, destrave, recalcule, repita. Cada passo usa a teoria do T1 (a ligação que destrói o pico de $S_2$), e cada passo custa $O(E\log E)$.
+\end{ideia}
+
+Resultados em Fortaleza, com $k=41$ vias ($\approx1\%$) e 40 dias simulados:
+\begin{center}
+\begin{tabular}{lcccc}
+\toprule
+& \multicolumn{2}{c}{tempo real (mesmo dia)} & \multicolumn{2}{c}{plano fixo (dias novos)}\\
+Estratégia & $\Delta q_c$ & $\Delta R$ & $\Delta q_c$ & $\Delta R$\\
+\midrule
+Aleatória & $+0{,}002$ & $+0{,}003$ & $0{,}000$ & $+0{,}004$\\
+Mais lentas & $+0{,}078$ & $+0{,}026$ & $+0{,}095$ & $+0{,}030$\\
+Maior betweenness & $+0{,}079$ & $+0{,}053$ & $+0{,}089$ & $+0{,}057$\\
+Red bonds (uma vez) & $+0{,}141$ & $+0{,}031$ & $+0{,}026$ & $+0{,}011$\\
+Ligações críticas & $\bm{+0{,}323}$ & $\bm{+0{,}093}$ & $+0{,}052$ & $+0{,}023$\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\problema{3} \textbf{Os gargalos evoluem.} Em Fortaleza, a sobreposição (índice de Jaccard $|X\cap Y|/|X\cup Y|$) entre as listas de 41 ligações críticas de dois dias consecutivos é $0{,}033$.
+\begin{enumerate}
+  \item Calcule o Jaccard esperado entre dois conjuntos de $k=41$ vias sorteados ao acaso entre $E=4166$. (Use $|X\cap Y|\approx k^2/E$.)
+  \item Os gargalos são persistentes, aleatórios, ou algo no meio? Quantas vezes acima do acaso está a sobreposição observada?
+  \item Use a tabela para explicar por que, no plano fixo, a betweenness vence as ligações críticas em Fortaleza, enquanto em tempo real acontece o contrário. \emph{Dica:} quais vias estão lentas \emph{todos} os dias?
+\end{enumerate}
+
+\problema{2} \textbf{Para a reunião com a AMC.} Com base na tabela e no problema anterior, escreva em cinco linhas uma recomendação para o controle semafórico de Fortaleza (CTAFOR). Diga o que um plano fixo de obras consegue, o que só o controle adaptativo consegue e qual medição a cidade precisaria fazer em tempo real.
+
+\solucoes
+
+\sol{1}
+(a) Fora do 2-core, a poda removeu nós em sequência a partir de ``folhas''. Então o subgrafo fora do 2-core é uma floresta pendurada no 2-core (ou o grafo inteiro é uma árvore), e toda aresta de uma árvore é ponte. (b) Dois triângulos ligados por uma aresta: todos os nós têm grau $\ge2$, então tudo está no 2-core, mas a aresta do meio é ponte. (c) Cada nó fora do 2-core está ligado ``para o lado do núcleo'' por exatamente uma aresta da floresta. Então há tantas arestas fora do 2-core quanto nós fora dele: 177. Como todas são pontes e o total de pontes também é 177, \emph{não há} pontes do tipo (b) em Fortaleza. Toda ponte do mapa é a entrada de um beco ou de uma árvore de ruas sem saída. Os gargalos do projeto, portanto, só aparecem quando o congestionamento ``remove'' ligações.
+
+\sol{2}
+(a) Se todo nó tivesse grau $\ge6$, teríamos $2E = \sum k_i\ge6N$, ou seja, $E\ge3N$, o que contradiz $E\le3N-6$. (b) Qualquer subgrafo de um grafo plano também é plano, então tem um nó de grau $\le5$, e nenhum subgrafo pode ter todos os graus $\ge6$. (c) Um limite mais forte vale quando não há triângulos (quarteirões têm 4 lados): aí $E\le2N-4$, e daí sai um nó de grau $\le3$, então o 4-core é vazio. E a borda do recorte desencadeia a cascata do Exemplo~1, que também esvazia o 3-core.
+
+\sol{3}
+Seja $Q = \tfrac34+\epsilon$. Então $3Q-2Q^2 = \tfrac98-2\epsilon^2$ (o termo linear se anula no máximo). A condição $1/p = \tfrac98-2\epsilon^2$ com $p = p_c+\Delta$ dá $1/p\approx\tfrac98-\tfrac{81}{64}\Delta$, logo $2\epsilon^2 = \tfrac{81}{64}\Delta$ e $\epsilon = \tfrac{9}{8\sqrt2}\Delta^{1/2}$. Há um salto finito ($0\to\tfrac34$) somado a uma singularidade com expoente $1/2$. Isso é perigoso porque não há sinal de alerta: o sistema parece saudável (o core é grande) até um ponto em que uma perturbação mínima derruba uma fração macroscópica de uma vez.
+
+\sol{4}
+Os pares que precisam cruzar a linha do meio são $(N/2)^2 = L^4/4$, e há $L$ arestas cruzando essa linha. A média é $\sim L^3/4$ por aresta, então $\mathrm{BC}_{\max}\sim L^3$. Conferido no computador: $\mathrm{BC}_{\max}/L^3 = 0{,}34$, $0{,}36$ e $0{,}36$ para $L = 10, 20, 40$. A aresta central recebe um pouco mais que a média, porque rotas de cantos opostos se concentram no centro.
+
+\sol{5}
+(a) Cada origem é sorteada com probabilidade $k/N$, então $\mathbb E[\widehat{\mathrm{BC}}] = \frac Nk\sum_s\frac kN\delta_s(e) = \sum_s\delta_s(e)$. (Somando sobre todas as origens, cada par $\{s,t\}$ aparece duas vezes, como $(s,t)$ e $(t,s)$; isso só multiplica tudo por 2.) (b) O projeto normaliza a carga para $\avg b = 1$, e qualquer fator constante desaparece nessa normalização.
+
+\sol{6}
+(a) O roteamento ``tudo ou nada'' manda cada par pelo único caminho mais rápido em fluxo livre. Uma avenida longa, reta e rápida que atravessa o recorte vira o caminho mais rápido para milhares de pares, e o fluxo inteiro se concentra nela. Não há realimentação: o caminho continua sendo o ``mais rápido'' mesmo saturado. (b) Com equilíbrio de Wardrop, parte do fluxo migraria para vias paralelas até que os tempos se igualassem, e a carga se espalharia. O modelo, portanto, \emph{exagera} a saturação desse corredor. Essa é uma limitação real. Corrigi-la (por exemplo, iterando ``carga $\to$ velocidade $\to$ novos caminhos'') é o próximo passo natural do pipeline.
+
+\sol{7}
+(a) $|X\cap Y|\approx41^2/4166 = 0{,}40$, e o Jaccard é $\approx0{,}40/(82-0{,}40) = 0{,}005$. (b) O observado, $0{,}033$, está $\approx7$ vezes acima do acaso: há alguma persistência, mas a maioria dos gargalos muda de um dia para o outro. Isso é exatamente o ``\emph{evolving critical bottlenecks}'' de Li \emph{et al.} (c) Os trechos de maior betweenness têm $\avg r\approx0$: estão travados \emph{todos} os dias, por causa da carga estrutural. Destravá-los abre um corredor longo em qualquer dia, e o ganho se transfere para dias novos. As ligações críticas de um dia dependem do ruído daquele dia, e quase não se repetem. Em tempo real, elas vencem com folga: $\Delta R = 0{,}093$ contra $0{,}053$.
+
+\sol{8}
+Uma resposta possível: ``(1) Um plano fixo deve atacar os corredores cronicamente saturados (Padre Valdevino, Duque de Caxias, Domingos Olímpio): é o que funciona em qualquer dia. (2) O ganho grande, cerca de 1,6 vez o melhor plano fixo em $R$ e 3,6 vezes em $q_c$, só vem do controle adaptativo, porque os gargalos de percolação mudam a cada dia. (3) Para isso, a CTAFOR precisaria medir $r_e$ em tempo real em toda a malha (GPS de ônibus e aplicativos, além dos laços indutivos), recalcular as ligações críticas a cada poucos minutos e priorizar o verde nelas. (4) O algoritmo é rápido o bastante: uma varredura completa em Fortaleza leva milissegundos.''
+
+\end{document}

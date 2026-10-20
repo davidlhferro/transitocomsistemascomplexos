@@ -2,3 +2,4 @@ dados/
 __pycache__/
 *.pyc
 cache/
+handouts/build/

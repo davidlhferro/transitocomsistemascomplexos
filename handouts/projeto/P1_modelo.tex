@@ -1,0 +1,208 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{P1}
+\titulo{O Modelo: das Velocidades ao Limiar Crítico}
+
+\begin{document}
+\fazertitulo
+
+Este é o primeiro dos três handouts sobre o \emph{nosso} projeto. Ele explica, equação por equação, como o código gera as velocidades de uma hora de rush (as seções 1 e 2 de \path{codigo/otimizacao_antes_depois.py}). Cada escolha do modelo tem uma razão física, e o Prof.\ José Soares vai perguntar por quê. O objetivo é que você consiga defender cada parâmetro na lousa.
+
+O modelo inteiro cabe em cinco linhas:
+\begin{align*}
+&\text{(1) fluxo livre:} && t_e^0 = \ell_e/v_e^{\rm CTB},\\
+&\text{(2) carga estrutural:} && b_e = \text{edge betweenness com pesos } t^0_e,\ \ \avg b = 1,\\
+&\text{(3) carga no rush:} && x_e = D\,(x_0 + b_e/c_e)\,\exp\!\left(\sigma_e\eta_e-\sigma_e^2/2\right),\\
+&\text{(4) ruído:} && \eta_e = \sqrt\psi\,\eta_e^{\rm crônico}+\sqrt{1-\psi}\,\eta_e^{\rm dia},\\
+&\text{(5) velocidade:} && r_e = 1/(1+\alpha x_e^\beta).
+\end{align*}
+Pré-requisitos: o handout T1 e a noção de distribuição normal. \pontos{18}
+
+\section{Por que velocidade \emph{relativa}?}
+
+Uma avenida a 30 km/h está congestionada. Uma rua residencial a 30 km/h está livre. Para comparar vias diferentes, precisamos de uma grandeza adimensional:
+\[
+r_e = \frac{v_e}{v_e^{\rm livre}}\in[0,1].
+\]
+Li \emph{et al.}\ usam como $v_e^{\rm livre}$ o percentil 95 das velocidades medidas na via ao longo do dia. Nós, sem dados de GPS, usamos o limite de velocidade do Código de Trânsito Brasileiro (CTB, Art.\ 61): 60 km/h em arteriais, 40 em coletoras e 30 em vias locais. Com isso, $r_e$ mede ``que fração da velocidade possível esta via entrega agora''.
+
+\section{A função BPR}
+
+\begin{ideia}
+A função do \emph{Bureau of Public Roads} (EUA, 1964) é a relação empírica mais usada em engenharia de tráfego entre tempo de viagem e volume:
+\[
+t = t^0\left[1+\alpha\left(\frac VC\right)^{\!\beta}\right],\qquad \alpha = 0{,}15,\ \ \beta = 4,
+\]
+onde $V/C = x$ é a razão volume/capacidade. Como $r = t^0/t$,
+\[
+r = \frac{1}{1+\alpha x^\beta}.
+\]
+\end{ideia}
+
+\begin{exemplo}
+Calcule $r$ na capacidade ($x=1$), encontre a carga que reduz a velocidade à metade e calcule a sensibilidade $\dd\ln r/\dd\ln x$.
+\end{exemplo}
+\begin{solucao}
+Com $x=1$: $r = 1/1{,}15 = 0{,}87$. Na ``capacidade'' a via ainda anda a 87\% da velocidade livre. Para $r=1/2$ precisamos de $\alpha x^4 = 1$, ou seja, $x = 0{,}15^{-1/4} = 1{,}61$. A sensibilidade é
+\[
+\frac{\dd\ln r}{\dd\ln x} = -\frac{\beta\alpha x^\beta}{1+\alpha x^\beta} = -\beta(1-r).
+\]
+Perto de $r=1$ a via é insensível à carga. Perto de $r=0$, 1\% a mais de carga derruba a velocidade em 4\%. É o expoente $\beta=4$ que faz o congestionamento ``explodir'' perto da saturação.
+\end{solucao}
+
+\problema{2} O modelo de Greenshields (1935) diz que a velocidade cai linearmente com a densidade: $v = v_f(1-\rho/\rho_j)$, onde $\rho_j$ é a densidade de engarrafamento total.
+\begin{enumerate}
+  \item Mostre que o fluxo $Q = \rho v$ é máximo em $\rho = \rho_j/2$, e que nesse ponto $r = 1/2$.
+  \item Na BPR, a ``capacidade'' $x=1$ corresponde a $r=0{,}87$, e não a $1/2$. Como reconciliar as duas coisas? \emph{Dica:} o que a BPR descreve quando $x>1$, se o fluxo numa via não pode passar do máximo?
+\end{enumerate}
+
+\section{Carga estrutural: betweenness}
+
+De onde vem o volume $V$? Sem uma matriz origem--destino de Fortaleza, fazemos a hipótese mais simples: cada par de cruzamentos troca a mesma quantidade de viagens, pelo caminho mais rápido em fluxo livre. Então a carga de cada via é proporcional à sua edge betweenness $b_e$ (veja o T3). Normalizamos para $\avg b = 1$ e dividimos pela capacidade relativa $c_e$ da classe da via (1 para vias locais, 2 para arteriais primárias etc.).
+
+\begin{ideia}
+A carga no rush é
+\[
+x_e = D\,\Big(x_0 + \frac{b_e}{c_e}\Big)\times(\text{ruído}).
+\]
+$D$ é a intensidade do rush (o único parâmetro de ``calibração''). A carga de fundo $x_0 = 0{,}6$ representa o tráfego local que todas as ruas recebem: garagens, entregas, gente procurando vaga. Esse tráfego não aparece na betweenness, que só conta viagens de passagem.
+\end{ideia}
+
+\problema{2} \textbf{Uma história real do desenvolvimento.} A betweenness de Fortaleza é muito desigual: a mediana é $0{,}11$ e o máximo é $27{,}5$. Na primeira versão do código, com o rush fraco demais ($D = 1{,}35$, então $Dx_0\approx0{,}8$), o resultado foi $q_c\approx0{,}86$ na malha sintética, ou seja, a cidade ``aguentava'' exigir 86\% da velocidade livre no rush.
+\begin{enumerate}
+  \item Usando a fórmula BPR, explique por que, com $Dx_0\approx0{,}8$, as ruas residenciais (que são a maioria e têm $b_e\approx0$) ficariam com $r\approx1$ \emph{em qualquer dia}.
+  \item Por que isso empurra $q_c$ para perto de 1, mesmo com as avenidas travadas? Use $q_c = F^{-1}(1-p_c)$.
+  \item Que lição isso dá sobre a diferença entre ``as vias importantes estão travadas'' e ``a rede está fragmentada''?
+\end{enumerate}
+
+\section{Ruído log-normal e a vulnerabilidade das arteriais}
+
+A carga de um dia é a carga média vezes um fator aleatório $e^{\sigma\eta-\sigma^2/2}$, com $\eta\sim\mathcal N(0,1)$. As arteriais têm $\sigma_e = \sigma(1+\kappa)$, com $\sigma = 0{,}45$ e $\kappa=0{,}5$, porque concentram semáforos, paradas de ônibus, conversões e acidentes.
+
+\problema{2} \textbf{Por que log-normal?} O fator de carga de um dia é o produto de muitos fatores independentes perto de 1: chuva ($\times1{,}1$), um evento no Centro ($\times1{,}05$), um ônibus quebrado ($\times1{,}2$)...
+\begin{enumerate}
+  \item Use o teorema central do limite em $\ln(\text{fator})$ para justificar a distribuição log-normal.
+  \item Mostre que $\avg{e^{\sigma\eta-\sigma^2/2}} = 1$. Por que esse termo de correção é essencial para interpretar $\sigma$ como ``só flutuação''?
+\end{enumerate}
+
+\section{Correlação espacial por difusão}
+
+Congestionamento não é independente de via para via: um acidente trava o quarteirão inteiro. Para gerar um ruído com correlação espacial, o código sorteia ruído branco nos nós e o ``espalha'' com $m=12$ passos de um passeio aleatório preguiçoso:
+\[
+\bm\phi\leftarrow\tfrac12\left(\bm\phi + P\bm\phi\right),\qquad P = D^{-1}A.
+\]
+Cada passo substitui o valor de cada nó pela média entre ele mesmo e a média dos vizinhos. É a \emph{equação do calor} discreta.
+
+\begin{exemplo}
+Numa cadeia 1D infinita, encontre a correlação $\avg{\phi_i\phi_{i+d}}$ depois de $m$ passos e o comprimento de correlação.
+\end{exemplo}
+\begin{solucao}
+Um passo é $\phi_i\leftarrow\tfrac12\phi_i+\tfrac14\phi_{i-1}+\tfrac14\phi_{i+1}$: um passeio aleatório que fica parado com probabilidade $1/2$ e anda $\pm1$ com probabilidade $1/4$ cada. A variância por passo é $\tfrac12$. Após $m$ passos, $\phi_i = \sum_j K_m(j)\xi_{i-j}$, com um núcleo $K_m$ (binomial) de média 0 e variância $m/2$. Para ruído branco $\xi$ com $\avg{\xi_a\xi_b}=\delta_{ab}$,
+\[
+\avg{\phi_i\phi_{i+d}} = \sum_j K_m(j)K_m(j+d) = (K_m\star K_m)(d).
+\]
+A autoconvolução de um núcleo de variância $m/2$ tem variância $m$ (variâncias se somam). Pelo TCL, para $m$ grande,
+\[
+\frac{\avg{\phi_i\phi_{i+d}}}{\avg{\phi_i^2}}\approx e^{-d^2/2m},\qquad \xi_{\rm corr}\sim\sqrt m.
+\]
+\end{solucao}
+
+\problema{3} Repita o cálculo numa grade quadrada 2D, onde o passeio preguiçoso fica parado com probabilidade $1/2$ e senão vai para um dos 4 vizinhos.
+\begin{enumerate}
+  \item Mostre que a variância por eixo por passo é $1/4$.
+  \item Encontre a função de correlação após $m$ passos e estime, em quarteirões, o comprimento de correlação para $m=12$.
+  \item O código depois faz $\eta_e^{\rm espacial} = \tfrac12(\phi_u+\phi_v)$ para a aresta $uv$ e mistura $\eta_e = \sqrt c\,\eta^{\rm espacial}_e+\sqrt{1-c}\,\eta^{\rm local}_e$ com $c=0{,}7$. Mostre que $\mathrm{Var}(\eta_e)=1$ (depois da padronização) e que a correlação entre duas arestas distintas é $c$ vezes a correlação espacial.
+\end{enumerate}
+
+\section{Desordem congelada e recozida}
+
+Na física de meios desordenados, distinguimos dois tipos de desordem. A \textbf{congelada} (\emph{quenched}) é fixa: as impurezas de um cristal não mudam. A \textbf{recozida} (\emph{annealed}) se re-sorteia o tempo todo. No trânsito, as duas existem:
+\begin{itemize}
+  \item congelada (crônica): uma escola, um buraco, um terminal de ônibus, um cruzamento mal desenhado. Trava \emph{todo} dia no mesmo lugar;
+  \item recozida (diária): chuva, um acidente, um evento. Muda a cada dia.
+\end{itemize}
+
+\begin{ideia}
+O modelo sorteia um campo crônico $\bm\eta^{\rm crônico}$ uma única vez e um campo diário $\bm\eta^{\rm dia}$ novo a cada dia, e combina os dois com o peso $\psi = 0{,}5$:
+\[
+\eta_e^{(d)} = \sqrt\psi\,\eta_e^{\rm crônico}+\sqrt{1-\psi}\,\eta_e^{{\rm dia}\,d}.
+\]
+O parâmetro $\psi$ controla o quanto a cidade é previsível, e por isso decide se um plano fixo consegue funcionar.
+\end{ideia}
+
+\problema{2} Mostre que, para a mesma via em dois dias diferentes, $\mathrm{Corr}\big(\eta_e^{(d)},\eta_e^{(d')}\big) = \psi$.
+
+\problema{3} \textbf{Previsão antes do experimento.} Sem rodar o código, preveja o que acontece com o ganho $\Delta R$ do plano fixo (ligações críticas escolhidas em dias de treino e testadas em dias novos) nos limites $\psi\to0$ e $\psi\to1$. E o ganho em tempo real, muda? Depois rode com \texttt{FRAC\_CRONICA} igual a $0{,}1$ e a $0{,}9$ e confira. (Um gráfico de $\Delta R_{\rm plano}/\Delta R_{\rm tempo\ real}$ em função de $\psi$ seria uma figura excelente para o artigo.)
+
+\section{Calibração}
+
+O único parâmetro ajustado foi a intensidade do rush, $D$. Na malha sintética, variando $D$ com os outros parâmetros fixos (8 dias para cada valor):
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+$D$ & mediana de $r$ & fração de vias com $r<0{,}5$ & $\avg{q_c}$\\
+\midrule
+1,35 & 0,90 & 0,20 & 0,91\\
+1,60 & 0,82 & 0,28 & 0,80\\
+1,80 & 0,74 & 0,33 & 0,76\\
+\textbf{2,00} & \textbf{0,65} & \textbf{0,40} & \textbf{0,68}\\
+2,20 & 0,56 & 0,46 & 0,56\\
+\bottomrule
+\end{tabular}
+\end{center}
+Escolhemos $D=2{,}0$: a via mediana anda a cerca de 2/3 da velocidade livre e 40\% das vias andam a menos da metade, o que é razoável para um pico. Em Fortaleza, com os \emph{mesmos} parâmetros, a mediana de $r$ é $0{,}60$ e $\avg{q_c} = 0{,}475$.
+
+\begin{center}
+\renewcommand{\arraystretch}{1.15}
+\begin{tabular}{lll}
+\toprule
+Parâmetro & Valor & Significado físico\\
+\midrule
+$\alpha$, $\beta$ & 0,15; 4 & função BPR (padrão da engenharia)\\
+$D$ & 2,0 & intensidade do rush (calibrado)\\
+$x_0$ & 0,6 & tráfego local de fundo\\
+$\sigma$ & 0,45 & flutuação log-normal da carga\\
+$\kappa$ & 0,5 & vulnerabilidade extra das arteriais\\
+$m$ & 12 & passos de difusão ($\xi_{\rm corr}\approx$ 2--3 quarteirões)\\
+$c$ & 0,7 & fração espacial da variância do ruído\\
+$\psi$ & 0,5 & fração crônica (congelada) da variância\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\problema{2} Em Fortaleza, a percolação de ligações com $r$ independentes e uniformes dá $p_c = 0{,}564$ (veja o T2). Usando a distribuição de $r$ gerada pelo modelo, $F^{-1}(1-p_c) = 0{,}502$. O valor medido com o modelo completo é $\avg{q_c} = 0{,}475\pm0{,}014$ (erro padrão).
+\begin{enumerate}
+  \item O que a diferença entre $0{,}502$ e $0{,}475$ mede?
+  \item A diferença é estatisticamente significativa? (O desvio entre dias é $0{,}086$ e são 40 dias.)
+  \item Proponha uma verificação numérica que isole a causa.
+\end{enumerate}
+
+\problema{2} \textbf{Sensibilidade.} Usando a solução do Problema 9 do T1, $\dd q_c/\dd\ln\bar x\approx-4q_c(1-q_c)$, estime quanto $q_c$ cai em Fortaleza se o rush ficar 5\% mais intenso. Por que esse número deveria preocupar a AMC?
+
+\solucoes
+
+\sol{1}
+(a) $Q = v_f(\rho-\rho^2/\rho_j)$ é máximo em $\rho=\rho_j/2$, onde $v = v_f/2$, ou seja, $r=1/2$. (b) A BPR não é uma relação fluxo--densidade. Ela relaciona o \emph{tempo de viagem} à demanda $V$ que \emph{quer} passar. Quando $x>1$, a demanda excede o que a via escoa, formam-se filas nos semáforos, e o tempo cresce como $x^4$ por causa da espera, não porque os carros andam devagar no meio do quarteirão. Na BPR, a ``capacidade'' é uma capacidade prática de projeto, e não o máximo de Greenshields. As duas descrições se encaixam se pensarmos que a BPR mede atraso médio, incluindo filas.
+
+\sol{2}
+(a) Com $b_e\approx0$, $x_e\approx Dx_0\approx0{,}8$ e $r = 1/(1+0{,}15\cdot0{,}8^4) = 0{,}94$. O ruído espalha isso, mas a via residencial típica continua quase livre. (b) Como as ruas residenciais são a maioria, a distribuição $F$ de $r$ fica concentrada perto de 1, e o quantil $F^{-1}(1-p_c)$ também fica perto de 1. A rede de ruas residenciais rápidas percola sozinha até $q$ muito alto. (c) A percolação mede \emph{conectividade global}, não ``quanto da cidade está ruim''. Se existe uma malha densa de desvios rápidos, a cidade não fragmenta, mesmo com as avenidas paradas. O modelo precisa de tráfego local realista para que as ruas residenciais também fiquem lentas no pico, como acontece de verdade (motoristas cortando caminho por dentro dos bairros).
+
+\sol{3}
+(a) $\ln(\text{fator}) = \sum_i\ln f_i$ é uma soma de muitas variáveis independentes, então é aproximadamente normal (TCL), e o fator é log-normal. (b) $\avg{e^{\sigma\eta}} = \int\frac{\dd\eta}{\sqrt{2\pi}}e^{-\eta^2/2+\sigma\eta} = e^{\sigma^2/2}$ (complete o quadrado). Sem a correção, aumentar $\sigma$ aumentaria a carga média e confundiríamos ``mais carros'' com ``mais imprevisibilidade''.
+
+\sol{4}
+(a) O passo anda em $x$ com probabilidade $1/4$ ($\pm1$, com $1/8$ cada), então a variância em $x$ por passo é $2\cdot\tfrac18 = \tfrac14$. (b) O núcleo após $m$ passos tem variância $m/4$ por eixo, e a autocorrelação tem variância $m/2$ por eixo: $\mathrm{Corr}(d)\approx e^{-d^2/m}$, com $d$ em quarteirões. Para $m=12$, o desvio padrão da correlação é $\sqrt6\approx2{,}4$ quarteirões. Na malha real os graus variam, então isso é só uma estimativa. (c) Depois da padronização, $\eta^{\rm espacial}$ e $\eta^{\rm local}$ têm variância 1 e são independentes, então $\mathrm{Var}(\eta_e) = c+(1-c) = 1$. Para $e\ne e'$, as partes locais são independentes, e $\mathrm{Cov}(\eta_e,\eta_{e'}) = c\,\mathrm{Corr}(\eta^{\rm esp}_e,\eta^{\rm esp}_{e'})$.
+
+\sol{5}
+Os campos diários de dias diferentes são independentes e independentes do crônico. Então $\mathrm{Cov} = \psi\,\mathrm{Var}(\eta^{\rm crônico}) = \psi$, e cada $\eta^{(d)}$ tem variância $\psi+(1-\psi)=1$. Logo $\mathrm{Corr} = \psi$.
+
+\sol{6}
+Com $\psi\to0$, os dias são independentes: os gargalos de hoje não dizem nada sobre amanhã, e o plano fixo com ligações críticas tende ao ganho aleatório. Só sobra a parte estrutural (betweenness), que não depende de $\psi$. Com $\psi\to1$, todo dia é igual: o plano fixo vira o próprio tempo real, e os dois ganhos coincidem. O ganho em tempo real quase não muda com $\psi$, porque em cada dia ele vê o ruído daquele dia, qualquer que seja a origem. Prevemos então que $\Delta R_{\rm plano}/\Delta R_{\rm tempo\ real}$ cresce de $\approx0$ até 1 conforme $\psi$ vai de 0 a 1.
+
+\sol{7}
+(a) Mede o efeito das \emph{correlações} (espaciais e da estrutura de carga): $F^{-1}(1-p_c)$ é o que teríamos se as mesmas velocidades fossem embaralhadas ao acaso entre as vias. As correlações fazem a cidade se fragmentar um pouco antes. Isso é plausível: as vias lentas se agrupam em ``manchas'' e em corredores (as avenidas), que funcionam como paredes. (b) A diferença é $0{,}027$, o erro padrão é $0{,}086/\sqrt{40} = 0{,}014$, e $0{,}027/0{,}014\approx2$: é marginal, cerca de $2\sigma$. Com 160 dias, o erro cairia pela metade. (c) Embaralhe os $r_e$ de cada dia entre as vias (\texttt{rng.permutation(r)}) e meça $q_c$. Isso preserva $F$ exatamente e destrói todas as correlações. Depois desligue só a parte espacial ($c=0$) para separar as duas fontes.
+
+\sol{8}
+$\Delta q_c\approx-4\cdot0{,}475\cdot0{,}525\cdot\ln1{,}05 = -1{,}0\cdot0{,}049\approx-0{,}05$. Isso é 10\% do $q_c$ de Fortaleza por um aumento de apenas 5\% na demanda. Pequenos aumentos de frota (ou um dia de chuva) têm efeito desproporcional na conectividade global, e é por isso que a cidade opera perto de uma transição de fase.
+
+\end{document}
