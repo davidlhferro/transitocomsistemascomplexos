@@ -13,7 +13,7 @@ O modelo inteiro cabe em cinco linhas:
 &\text{(1) fluxo livre:} && t_e^0 = \ell_e/v_e^{\rm CTB},\\
 &\text{(2) carga estrutural:} && b_e = \text{edge betweenness com pesos } t^0_e,\ \ \avg b = 1,\\
 &\text{(3) carga no rush:} && x_e = D\,(x_0 + b_e/c_e)\,\exp\!\left(\sigma_e\eta_e-\sigma_e^2/2\right),\\
-&\text{(4) ruído:} && \eta_e = \sqrt\psi\,\eta_e^{\rm crônico}+\sqrt{1-\psi}\,\eta_e^{\rm dia},\\
+&\text{(4) ruído:} && \eta_e = \sqrt\psi\,\eta_e^{\text{crônico}}+\sqrt{1-\psi}\,\eta_e^{\rm dia},\\
 &\text{(5) velocidade:} && r_e = 1/(1+\alpha x_e^\beta).
 \end{align*}
 Pré-requisitos: o handout T1 e a noção de distribuição normal. \pontos{18}
@@ -123,9 +123,9 @@ Na física de meios desordenados, distinguimos dois tipos de desordem. A \textbf
 \end{itemize}
 
 \begin{ideia}
-O modelo sorteia um campo crônico $\bm\eta^{\rm crônico}$ uma única vez e um campo diário $\bm\eta^{\rm dia}$ novo a cada dia, e combina os dois com o peso $\psi = 0{,}5$:
+O modelo sorteia um campo crônico $\bm\eta^{\text{crônico}}$ uma única vez e um campo diário $\bm\eta^{\rm dia}$ novo a cada dia, e combina os dois com o peso $\psi = 0{,}5$:
 \[
-\eta_e^{(d)} = \sqrt\psi\,\eta_e^{\rm crônico}+\sqrt{1-\psi}\,\eta_e^{{\rm dia}\,d}.
+\eta_e^{(d)} = \sqrt\psi\,\eta_e^{\text{crônico}}+\sqrt{1-\psi}\,\eta_e^{{\rm dia}\,d}.
 \]
 O parâmetro $\psi$ controla o quanto a cidade é previsível, e por isso decide se um plano fixo consegue funcionar.
 \end{ideia}
@@ -194,7 +194,7 @@ $\psi$ & 0,5 & fração crônica (congelada) da variância\\
 (a) O passo anda em $x$ com probabilidade $1/4$ ($\pm1$, com $1/8$ cada), então a variância em $x$ por passo é $2\cdot\tfrac18 = \tfrac14$. (b) O núcleo após $m$ passos tem variância $m/4$ por eixo, e a autocorrelação tem variância $m/2$ por eixo: $\mathrm{Corr}(d)\approx e^{-d^2/m}$, com $d$ em quarteirões. Para $m=12$, o desvio padrão da correlação é $\sqrt6\approx2{,}4$ quarteirões. Na malha real os graus variam, então isso é só uma estimativa. (c) Depois da padronização, $\eta^{\rm espacial}$ e $\eta^{\rm local}$ têm variância 1 e são independentes, então $\mathrm{Var}(\eta_e) = c+(1-c) = 1$. Para $e\ne e'$, as partes locais são independentes, e $\mathrm{Cov}(\eta_e,\eta_{e'}) = c\,\mathrm{Corr}(\eta^{\rm esp}_e,\eta^{\rm esp}_{e'})$.
 
 \sol{5}
-Os campos diários de dias diferentes são independentes e independentes do crônico. Então $\mathrm{Cov} = \psi\,\mathrm{Var}(\eta^{\rm crônico}) = \psi$, e cada $\eta^{(d)}$ tem variância $\psi+(1-\psi)=1$. Logo $\mathrm{Corr} = \psi$.
+Os campos diários de dias diferentes são independentes e independentes do crônico. Então $\mathrm{Cov} = \psi\,\mathrm{Var}(\eta^{\text{crônico}}) = \psi$, e cada $\eta^{(d)}$ tem variância $\psi+(1-\psi)=1$. Logo $\mathrm{Corr} = \psi$.
 
 \sol{6}
 Com $\psi\to0$, os dias são independentes: os gargalos de hoje não dizem nada sobre amanhã, e o plano fixo com ligações críticas tende ao ganho aleatório. Só sobra a parte estrutural (betweenness), que não depende de $\psi$. Com $\psi\to1$, todo dia é igual: o plano fixo vira o próprio tempo real, e os dois ganhos coincidem. O ganho em tempo real quase não muda com $\psi$, porque em cada dia ele vê o ruído daquele dia, qualquer que seja a origem. Prevemos então que $\Delta R_{\rm plano}/\Delta R_{\rm tempo\ real}$ cresce de $\approx0$ até 1 conforme $\psi$ vai de 0 a 1.
