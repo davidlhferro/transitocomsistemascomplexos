@@ -1,0 +1,130 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T6}
+\titulo{Redes Dirigidas: Mão Única e Componentes Fortemente Conexos}
+
+\begin{document}
+\fazertitulo
+
+Até agora tratamos a malha como uma rede \emph{não-dirigida}: dois cruzamentos estão ``conectados'' se há uma rua entre eles, em qualquer sentido. Mas no corredor Benfica--Centro--Aldeota, \textbf{72\% das ruas são de mão única}. Um motorista que consegue ir de A a B pode não conseguir voltar. Este handout traz as ferramentas para redes dirigidas e mostra, com números de Fortaleza, que ignorar o sentido das ruas superestima muito a resiliência da cidade. É a base da melhoria nº~5 do projeto.
+
+Para ler mais: M.~E.~J.~Newman, S.~H.~Strogatz e D.~J.~Watts, Phys.\ Rev.\ E \textbf{64}, 026118 (2001); A.~Broder \emph{et al.}, Computer Networks \textbf{33}, 309 (2000); R.~Tarjan, SIAM J.\ Comput.\ \textbf{1}, 146 (1972). Pré-requisitos: T1 e T2. \pontos{15}
+
+\section{Conectividade fraca e forte}
+
+Num grafo dirigido, cada \emph{arco} $u\to v$ tem sentido. Uma rua de mão dupla vira dois arcos, $u\to v$ e $v\to u$. Cada nó tem um grau de entrada $j$ e um grau de saída $k$.
+
+\begin{ideia}
+\begin{itemize}
+  \item \textbf{Componente fracamente conexo (WCC):} conectado ignorando os sentidos. É o que o projeto usa hoje.
+  \item \textbf{Componente fortemente conexo (SCC):} todo nó alcança todo outro \emph{respeitando os sentidos}. Para o trânsito, é o que importa: um motorista precisa ir e voltar.
+\end{itemize}
+Todo SCC está dentro de um WCC, mas não o contrário. Uma rua de mão única que é a única ligação entre dois bairros conecta os dois fracamente, mas não fortemente.
+\end{ideia}
+
+Na malha de Fortaleza (já com os cruzamentos de pista dupla fundidos), são 2470 cruzamentos, 4166 ruas e 5314 arcos: 1148 ruas de mão dupla e 3018 de mão única. O maior WCC tem os 2470 nós, e o maior SCC tem 2443 (98,9\%). Há 9 nós sem arco de entrada (``fontes'') e 7 sem arco de saída (``sumidouros'').
+
+\problema{2} Numa cidade de verdade, todo cruzamento deveria ter entrada e saída. Por que aparecem fontes e sumidouros no recorte? \emph{Dica:} o que acontece com uma rua de mão única que atravessa a borda do retângulo?
+
+\section{A estrutura gravata-borboleta}
+
+\begin{ideia}
+Toda rede dirigida se organiza em torno do maior SCC (o \textbf{núcleo}):
+\begin{itemize}
+  \item \textbf{IN:} nós que alcançam o núcleo, mas não são alcançados por ele;
+  \item \textbf{OUT:} nós alcançados pelo núcleo, mas que não o alcançam;
+  \item \textbf{tentáculos} e componentes isolados: o resto.
+\end{itemize}
+Broder \emph{et al.}\ (2000) encontraram essa ``gravata-borboleta'' na web. Numa cidade, um nó em IN é um lugar de onde se sai mas para onde não se volta (de carro). Num tráfego bem desenhado, IN e OUT devem ser praticamente vazios.
+\end{ideia}
+
+\begin{exemplo}
+Uma grade $L\times L$ em que as ruas horizontais alternam o sentido (leste, oeste, leste, ...) e as verticais também (norte, sul, ...), como em Manhattan. Ela é fortemente conexa? E se as quatro ruas da borda forem de mão dupla?
+\end{exemplo}
+\begin{solucao}
+\emph{Só alternando, não é.} Olhe para o canto $(0,0)$: a linha 0 vai para leste e a coluna 0 vai para o norte, então os dois arcos do canto \emph{saem} dele. Ninguém consegue chegar ao canto: ele é uma fonte. Conferido no computador: para todo $L$ de 2 a 10, a grade alternada tem 3 a 5 SCCs, porque alguns cantos viram fontes ou sumidouros.
+
+\emph{Com a borda em mão dupla, é.} Toda rua interna começa e termina na borda. Para ir de $a$ até $b$: siga a rua horizontal de $a$ no sentido dela até a borda; ande pela borda (mão dupla, então dá para ir para qualquer lado) até o \emph{começo} da rua horizontal de $b$; siga essa rua até $b$. Conferido para $L$ de 3 a 11. A lição: a conectividade forte de uma malha de mão única depende de detalhes \emph{locais} (como os cantos e as bordas), que a análise não-dirigida não vê.
+\end{solucao}
+
+\problema{3} Uma via de mão dupla é transformada em mão única (decisão comum para ``melhorar o fluxo''). Dê um exemplo pequeno em que isso mantém a rede fortemente conexa e outro em que destrói a conectividade forte. Que propriedade da rua decide entre os dois casos? (Compare com as pontes do T3.)
+
+\section{Achando SCCs: o algoritmo de Kosaraju}
+
+\begin{ideia}
+Os SCCs de um grafo com $N$ nós e $A$ arcos se acham em $O(N+A)$ com duas buscas em profundidade:
+\begin{enumerate}
+  \item faça uma busca em profundidade no grafo e anote a ordem em que cada nó \emph{termina};
+  \item inverta todos os arcos;
+  \item faça buscas no grafo invertido, começando pelos nós em ordem decrescente de término. Cada busca acha exatamente um SCC.
+\end{enumerate}
+O algoritmo de Tarjan faz o mesmo com uma busca só. No Python, \texttt{scipy.sparse.csgraph.connected\_components(..., connection='strong')}, que roda em C.
+\end{ideia}
+
+\problema{2} Por que, no passo 3, uma busca começando no nó que terminou por último não ``vaza'' para fora do SCC dele? \emph{Dica:} esse nó está num SCC ``fonte'' do grafo de SCCs. O que a inversão dos arcos faz com fontes?
+
+\section{O componente gigante dirigido}
+
+A distribuição conjunta dos graus é $p_{jk}$ (fração de nós com $j$ arcos entrando e $k$ saindo). Como todo arco sai de algum nó e entra em outro, $\avg j = \avg k$.
+
+\begin{exemplo}
+Mostre que existe um componente de saída gigante (e um SCC gigante) quando $\avg{jk}>\avg k$ (Newman, Strogatz \& Watts, 2001).
+\end{exemplo}
+\begin{solucao}
+Siga um arco até o nó em que ele chega. Esse nó tem graus $(j,k)$ com probabilidade proporcional a $j\,p_{jk}$, porque nós com mais arcos de entrada são alcançados mais vezes. A partir dele, há $k$ arcos novos para seguir (num grafo aleatório esparso, a chance de voltar pelo mesmo caminho é desprezível). O número médio de ``filhos'' é
+\[
+\frac{\sum_{jk}jk\,p_{jk}}{\sum_{jk}j\,p_{jk}} = \frac{\avg{jk}}{\avg j} = \frac{\avg{jk}}{\avg k}.
+\]
+O processo de ramificação sobrevive se isso for maior que 1: $\avg{jk}>\avg k$, ou, de forma equivalente, $\sum_{jk}(2jk-j-k)\,p_{jk}>0$. Pela simetria entre seguir arcos para frente e para trás, a mesma condição dá o componente de entrada gigante, e o SCC gigante é a interseção dos dois.
+\end{solucao}
+
+\problema{2} Em Fortaleza, $\avg{jk} = 5{,}10$ e $\avg k = 2{,}15$. A condição é satisfeita com folga? Por que, numa malha viária, $j$ e $k$ são fortemente correlacionados (o que aumenta $\avg{jk}$ além de $\avg j\avg k$)?
+
+\section{Percolação dirigida em Fortaleza}
+
+Agora damos a \emph{cada arco} uma velocidade relativa independente $r\sim U(0,1)$, já que os dois sentidos de uma rua podem ter trânsitos diferentes. Medimos o pico de $S_2$ (40 amostras), usando componentes fracos e fortes:
+\begin{center}
+\begin{tabular}{lccc}
+\toprule
+Conectividade & $\avg{q_c}$ & $p_c = 1-\avg{q_c}$ & pico médio de $S_2$\\
+\midrule
+fraca (ignora sentidos) & $0{,}480\pm0{,}004$ & 0,52 & 553 nós\\
+\textbf{forte (respeita sentidos)} & $\bm{0{,}254\pm0{,}006}$ & \textbf{0,75} & 361 nós\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ideia}
+Respeitando os sentidos, a cidade se fragmenta num $q$ muito menor: é preciso que 75\% dos arcos estejam funcionando, em vez de 52\%. A razão é que um SCC exige caminhos de ida \emph{e} de volta, e cada rua de mão única é um ``diodo'' que só conduz num sentido. A análise não-dirigida do projeto \textbf{superestima} a resiliência de Fortaleza, e os gargalos críticos verdadeiros provavelmente incluem muitas ruas de mão única.
+\end{ideia}
+
+\problema{3} Com $r$ uniforme \emph{por rua} (não por arco), a malha não-dirigida tem $p_c = 0{,}564$ (T2), ou seja, $q_c = 0{,}436$. Com $r$ \emph{por arco} e conectividade fraca, $q_c = 0{,}480$. Explique por que o segundo é maior. \emph{Dica:} para a conectividade fraca, uma rua de mão dupla com dois arcos está ``aberta'' se \emph{qual} deles estiver aberto? Com que probabilidade, se cada arco está aberto com probabilidade $p$?
+
+\problema{3} \textbf{Por que o truque de Newman--Ziff não funciona para SCCs.} No caso não-dirigido, adicionar uma ligação junta \emph{no máximo dois} clusters, e o union-find resolve isso em $O(1)$.
+\begin{enumerate}
+  \item Mostre com um exemplo que adicionar um único arco pode juntar \emph{muitos} SCCs de uma vez.
+  \item Por que o teorema ``$\max S_2 = \max_e\min(s_a,s_b)$'' (T1, Exemplo 3) deixa de valer?
+  \item Proponha como adaptar o pipeline: qual é o custo de calcular os SCCs numa grade de 400 valores de $q$ em Fortaleza? Como você acharia a ``ligação crítica'' sem o teorema?
+\end{enumerate}
+
+\solucoes
+
+\sol{1}
+Uma rua de mão única que cruza a borda tem uma ponta dentro e outra fora do recorte. O recorte corta o arco, e o nó de dentro perde sua única entrada (se a rua vinha de fora) ou sua única saída (se a rua ia para fora). Por isso fontes e sumidouros ficam todos perto da borda. É um efeito de tamanho finito do recorte, não da cidade. Mais um motivo para estudar recortes de vários tamanhos (T4).
+
+\sol{2}
+Mantém: num quarteirão quadrado com as quatro ruas de mão dupla, tornar uma delas de mão única ainda deixa voltar pelos outros três lados. Destrói: uma rua que é a única ligação de um beco (uma ponte); com mão única, quem entra não sai, ou ninguém entra. A propriedade é a seguinte: uma rua pode virar mão única sem perder a conectividade forte se, e só se, ela está num ciclo, ou seja, não é ponte. (Esse é o teorema de Robbins, de 1939: um grafo admite uma orientação fortemente conexa se, e só se, não tem pontes.)
+
+\sol{3}
+O nó que termina por último na primeira busca pertence a um SCC que não é alcançado por nenhum outro SCC (uma ``fonte'' no grafo acíclico de SCCs). Invertendo os arcos, esse SCC vira um ``sumidouro'': dele não sai nenhum arco para outro SCC. Então a busca no grafo invertido fica presa dentro dele e acha exatamente esse SCC. Removendo-o, o argumento se repete com o próximo.
+
+\sol{4}
+$5{,}10>2{,}15$, uma folga de mais de 2 vezes. Na malha, $j$ e $k$ estão fortemente correlacionados porque cada rua de mão dupla contribui com 1 para $j$ \emph{e} 1 para $k$ do mesmo nó, e porque o desenho urbano equilibra entradas e saídas (um cruzamento com 3 entradas e 0 saídas seria absurdo). Com $j\approx k$, $\avg{jk}\approx\avg{k^2}>\avg k^2$.
+
+\sol{5}
+Para a conectividade fraca, a rua de mão dupla está aberta se \emph{pelo menos um} dos dois arcos estiver aberto: probabilidade $1-(1-p)^2 = 2p-p^2>p$. As ruas de mão dupla ficam ``mais fáceis'' de abrir, e a rede percola com um $p$ menor por arco, ou seja, um $q_c$ maior. Com 28\% das ruas de mão dupla, o efeito desloca $q_c$ de $0{,}436$ para $0{,}480$. Esse número também mostra como a escolha ``uma velocidade por rua ou por arco'' importa. Com dados reais de GPS, o natural é usar uma por arco.
+
+\sol{6}
+(a) Um ciclo dirigido $1\to2\to\cdots\to m$ sem o arco $m\to1$: cada nó é seu próprio SCC. Adicionar $m\to1$ fecha o ciclo e junta os $m$ SCCs de uma vez. (b) O teorema usava que cada evento muda o tamanho de no máximo dois clusters, e que só a fusão dos dois maiores reduz $S_2$. Com SCCs, uma fusão pode juntar o 1º, o 2º e o 3º maiores de uma vez, e $S_2$ pode cair para o 4º. Além disso, o tamanho do SCC não é ``a soma de dois tamanhos'', então a quantidade $\min(s_a,s_b)$ deixa de fazer sentido. (c) Cada $q$ custa $O(N+A)\approx8000$ operações em C, então 400 valores levam décimos de segundo: viável. Para achar a ligação crítica: localize o intervalo de $q$ em que $S_2$ cai (busca binária entre dois pontos da grade) e teste, um a um, os arcos com $r$ nesse intervalo, recalculando os SCCs. O primeiro arco cuja adição junta os dois maiores SCCs é a ligação crítica.
+
+\end{document}

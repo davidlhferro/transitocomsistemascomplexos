@@ -1,0 +1,132 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T4}
+\titulo{Escala de Tamanho Finito e Análise de Dados}
+
+\begin{document}
+\fazertitulo
+
+Uma cidade não é infinita. O corredor Benfica--Centro--Aldeota tem $N\approx2500$ cruzamentos, ou seja, um ``tamanho linear'' $L\sim\sqrt N\approx50$ quarteirões. Os expoentes da tabela do T1 valem só no limite $L\to\infty$. Este handout ensina a extrair esses expoentes de sistemas finitos, que é a técnica central de qualquer trabalho numérico em fenômenos críticos. Ele também ensina a pôr barras de erro honestas nos resultados.
+
+Todos os números da Seção 3 foram gerados com a função \texttt{limiar\_critico} do projeto, em redes quadradas de $L=16$ a $128$.
+
+Para ler mais: Stauffer \& Aharony, cap.\ 4; M.~E.~J.~Newman e G.~T.~Barkema, \emph{Monte Carlo Methods in Statistical Physics} (Oxford, 1999), cap.\ 8; B.~Efron e R.~Tibshirani, \emph{An Introduction to the Bootstrap} (1993). Pré-requisitos: T1. \pontos{17}
+
+\section{A hipótese de escala}
+
+Perto de $p_c$, o único comprimento que importa num sistema infinito é $\xi\sim|p-p_c|^{-\nu}$. Num sistema finito, aparece um segundo comprimento, $L$. A hipótese de escala de tamanho finito diz que \emph{tudo depende só da razão $L/\xi$}.
+
+\begin{ideia}
+Se uma grandeza diverge (ou vai a zero) como $X\sim|p-p_c|^{-x}$ no sistema infinito, num sistema de tamanho $L$ ela vale
+\[
+X(p,L) = L^{x/\nu}\,\mathcal F_X\!\left[(p-p_c)\,L^{1/\nu}\right].
+\]
+A função $\mathcal F_X$ é universal e não depende de $L$. Duas consequências práticas:
+\begin{itemize}
+  \item exatamente em $p_c$, $X(p_c,L)\sim L^{x/\nu}$, uma lei de potência em $L$;
+  \item graficando $X\,L^{-x/\nu}$ contra $(p-p_c)L^{1/\nu}$, as curvas de todos os $L$ caem \emph{umas sobre as outras} (o \emph{colapso de dados}).
+\end{itemize}
+\end{ideia}
+
+Por exemplo, $S_1/N\sim|p-p_c|^\beta$ dá $S_1/N = L^{-\beta/\nu}\mathcal F[(p-p_c)L^{1/\nu}]$, e o maior cluster em $p_c$ tem massa $S_1\sim L^{d-\beta/\nu} = L^{d_f}$.
+
+\begin{exemplo}
+Cada amostra (cada ``dia'') de tamanho $L$ tem seu próprio limiar $p_c(L)$, que é aleatório. Mostre que a média e o desvio padrão de $p_c(L)$ se aproximam de $p_c$ e de zero como $L^{-1/\nu}$.
+\end{exemplo}
+\begin{solucao}
+Seja $\Pi_L(p)$ a probabilidade de a amostra estar conectada (percolando) no nível $p$. Como abrir mais ligações só ajuda, ``a amostra percola em $p$'' é o mesmo que ``o limiar da amostra é $\le p$''. Então $\Pi_L(p) = \Pr[p_c(L)\le p]$ é a \emph{distribuição acumulada} de $p_c(L)$, e sua derivada é a densidade. Por escala, $\Pi_L(p) = \Phi[(p-p_c)L^{1/\nu}]$. Mudando de variável para $z = (p-p_c)L^{1/\nu}$, que tem uma distribuição fixa (independente de $L$),
+\[
+p_c(L) = p_c + z\,L^{-1/\nu}\quad\Longrightarrow\quad \avg{p_c(L)}-p_c = \avg z\,L^{-1/\nu},\qquad \sigma[p_c(L)] = \sigma_z\,L^{-1/\nu}.
+\]
+Os dois decaem com o mesmo expoente. A largura é mais útil para medir $\nu$, porque não exige conhecer $p_c$.
+\end{solucao}
+
+\problema{2} Usando a hipótese de escala, mostre que o pico do segundo maior cluster escala como $S_2^{\max}\sim L^{d_f}$. \emph{Dica:} em $p_c$, os dois maiores clusters são ambos ``o maior cluster numa caixa de lado $\sim L$''.
+
+\section{Por que $p_c(L)$ deriva}
+
+Na rede quadrada, o limiar médio das amostras finitas fica \emph{acima} de $1/2$ e se aproxima por cima. A razão é geométrica: as bordas. Um nó na borda tem menos vizinhos, e a rede finita é ``mais fraca'' que a infinita, então precisa de mais ligações abertas para percolar. O efeito de borda decai como (fração de nós na borda) $\sim1/L$, mas o que domina é a janela crítica, $\sim L^{-1/\nu} = L^{-3/4}$, que é \emph{maior} que $1/L$.
+
+\problema{2} Em Fortaleza, a fração de cruzamentos na borda do recorte é bem maior que numa grade quadrada de mesmo $N$, porque o recorte corta muitas ruas. O que você espera para o $p_c$ de Fortaleza comparado ao de uma grade infinita com a mesma estrutura local? E comparado ao de um recorte duas vezes maior da mesma cidade?
+
+\section{Um experimento numérico completo}
+
+Para $L = 16, 32, 64, 128$, sorteamos $r$ uniforme em cada ligação da rede quadrada (600 amostras; 300 para $L=128$) e medimos, em cada amostra, $p_c(L) = 1-q_c$ e o pico de $S_2$:
+\begin{center}
+\begin{tabular}{ccccc}
+\toprule
+$L$ & $\avg{p_c(L)}$ & largura $\sigma[p_c(L)]$ & $\avg{S_2^{\max}}$ & $\avg{S_2^{\max}}/N$\\
+\midrule
+16 & 0,5131 & $0{,}0580\pm0{,}0017$ & $55{,}4\pm0{,}8$ & 0,216\\
+32 & 0,5083 & $0{,}0340\pm0{,}0010$ & $203{,}7\pm2{,}9$ & 0,199\\
+64 & 0,5060 & $0{,}0216\pm0{,}0007$ & $782\pm12$ & 0,191\\
+128 & 0,5044 & $0{,}0125\pm0{,}0005$ & $2780\pm56$ & 0,170\\
+\bottomrule
+\end{tabular}
+\end{center}
+
+\begin{ideia}
+\textbf{Ajustes em log-log.} Se $y = AL^{a}$, então $\ln y = \ln A + a\ln L$, uma reta. Ajustando por mínimos quadrados os quatro pontos:
+\begin{itemize}
+  \item largura: inclinação $-0{,}728$, ou seja, $1/\nu = 0{,}728$ (exato: $0{,}75$);
+  \item $S_2^{\max}$: inclinação $1{,}889$, ou seja, $d_f = 1{,}889$ (exato: $91/48 = 1{,}896$);
+  \item fixando $1/\nu = 3/4$ e ajustando $\avg{p_c(L)} = p_c + aL^{-3/4}$: $p_c = 0{,}502$ (exato: $0{,}5$).
+\end{itemize}
+Com 20 segundos de computação, recuperamos os expoentes exatos da percolação 2D com erro de 1 a 3\%.
+\end{ideia}
+
+\problema{3} \textbf{Expoentes efetivos.} Calcule as inclinações ``locais'' entre pares consecutivos de $L$ na tabela, para a largura e para $S_2^{\max}$. Elas se aproximam de um valor fixo? O que você conclui sobre a confiabilidade do ajuste com quatro pontos? Por que as inclinações locais oscilam?
+
+\problema{2} A última coluna mostra que $S_2^{\max}/N$ cai devagar. Qual expoente a teoria prevê para essa queda? Os dados concordam?
+
+\problema{3} \textbf{Colapso de dados.} Descreva, passo a passo, como você faria o colapso de $S_1/N$ com os dados de $L=16,\dots,128$, e o que faria se o colapso ficasse ``quase bom'' mas não perfeito. Que parâmetros você pode ajustar? Como saber se o ajuste é bom?
+
+\section{Barras de erro honestas}
+
+\begin{ideia}
+\begin{itemize}
+  \item \textbf{Erro padrão da média:} com $n$ amostras independentes de desvio $s$, a média tem incerteza $s/\sqrt n$.
+  \item \textbf{Bootstrap:} para a incerteza de qualquer outra coisa (o desvio padrão, um expoente, uma razão), sorteie com reposição $n$ amostras dentre as $n$ originais, recalcule a grandeza e repita centenas de vezes. O desvio padrão dessas réplicas é a barra de erro. A incerteza da largura na tabela acima foi calculada assim, com 300 réplicas.
+  \item \textbf{Teste pareado:} se duas estratégias foram avaliadas nas \emph{mesmas} amostras, compare as diferenças amostra a amostra (P2, Problema 8).
+\end{itemize}
+\end{ideia}
+
+\begin{exemplo}
+Com $n$ amostras gaussianas, a incerteza relativa do desvio padrão amostral é $\approx1/\sqrt{2n}$. Quantas amostras são necessárias para medir a largura com 3\% de precisão? Confira com a tabela.
+\end{exemplo}
+\begin{solucao}
+$1/\sqrt{2n} = 0{,}03$ dá $n\approx560$. Na tabela, com $n=600$: $0{,}0017/0{,}0580 = 2{,}9\%$ para $L=16$ e $0{,}0010/0{,}0340 = 2{,}9\%$ para $L=32$. Com $n=300$ ($L=128$): $1/\sqrt{600} = 4{,}1\%$, contra $0{,}0005/0{,}0125 = 4\%$ medido. A distribuição de $p_c(L)$ é quase gaussiana.
+\end{solucao}
+
+\problema{3} Propague o erro: se as larguras em $L_1$ e $L_2 = 2L_1$ têm incerteza relativa $\epsilon$ cada uma, qual é a incerteza do expoente local $1/\nu = -\ln(w_2/w_1)/\ln2$? Quantas amostras por tamanho seriam necessárias para medir cada expoente local com incerteza $\pm0{,}02$?
+
+\section{E em Fortaleza?}
+
+Com $r$ uniforme e independente em cada via, a malha de Fortaleza tem $\avg{p_c} = 0{,}564$ e largura $\sigma[p_c] = 0{,}034$ (400 amostras). A rede quadrada com $L\approx\sqrt{2470}\approx50$ teria largura $\approx0{,}058\,(50/16)^{-3/4} = 0{,}025$.
+
+\problema{2} Por que a largura de Fortaleza é maior que a da rede quadrada de mesmo $N$? Dê pelo menos duas razões. Proponha como medir o ``$L$ efetivo'' de uma malha irregular.
+
+\solucoes
+
+\sol{1}
+Em $p_c$, $\xi\gtrsim L$, e os clusters grandes são fractais limitados pela caixa: o maior tem massa $\sim L^{d_f}$. O segundo maior é ``o maior que sobrou'', ainda limitado só por $L$, e por escala tem a mesma forma $S_2 = L^{d_f}\mathcal G[(p-p_c)L^{1/\nu}]$, com $\mathcal G$ fixa. O máximo de $\mathcal G$ é um número, então $S_2^{\max}\sim L^{d_f}$.
+
+\sol{2}
+Muitas bordas tornam a rede efetivamente mais fraca, e o $p_c$ medido fica \emph{acima} do da grade infinita equivalente. Um recorte duas vezes maior tem relativamente menos borda, e seu $p_c$ deve ser menor, mais perto do valor ``infinito''. Em tamanho finito, $p_c(L)-p_c(\infty)\sim L^{-1/\nu}$. Parte do $0{,}564$ de Fortaleza (comparado ao $0{,}5$ da grade) é efeito de tamanho e de borda, e parte vem da estrutura (becos, grau médio 3,37).
+
+\sol{3}
+Largura: $0{,}77$, $0{,}65$, $0{,}79$. $S_2^{\max}$: $1{,}88$, $1{,}94$, $1{,}83$. Elas oscilam em torno dos valores exatos, sem tendência clara. O ruído estatístico (cada largura tem $\approx3$--4\% de erro, e um expoente local entre dois pontos tem erro $\approx\sqrt2\cdot0{,}04/\ln2\approx0{,}08$) é maior que qualquer correção sistemática visível. O ajuste global com quatro pontos é razoável, mas as barras de erro dos expoentes são $\sim\pm0{,}03$, e não seria honesto citar três casas decimais.
+
+\sol{4}
+$S_2^{\max}/N\sim L^{d_f-2} = L^{-5/48} = L^{-0{,}104}$. De $L=16$ a $128$ (fator 8), a previsão é uma queda por $8^{-0{,}104} = 0{,}81$. Os dados dão $0{,}170/0{,}216 = 0{,}79$. Concordam.
+
+\sol{5}
+(1) Escolha $p_c$, $\nu$ e $\beta/\nu$ (comece pelos valores teóricos). (2) Para cada $L$, faça o gráfico de $y = (S_1/N)L^{\beta/\nu}$ contra $x = (p-p_c)L^{1/\nu}$. (3) Se as curvas não coincidem, ajuste os três parâmetros para minimizar a dispersão entre as curvas numa janela em torno de $x=0$ (por exemplo, a soma dos quadrados das distâncias entre curvas interpoladas). (4) Para saber se é bom: a dispersão residual deve ser compatível com as barras de erro, e os parâmetros não podem mudar muito ao estreitar a janela ou ao retirar o menor $L$. Se mudam, há correções de escala, e só os tamanhos maiores devem entrar.
+
+\sol{6}
+$\delta(1/\nu) = \frac{1}{\ln2}\sqrt{\epsilon^2+\epsilon^2} = \frac{\sqrt2\,\epsilon}{\ln2}\approx2{,}04\,\epsilon$. Para $\pm0{,}02$, precisamos de $\epsilon\approx0{,}0098$, e com $\epsilon\approx1/\sqrt{2n}$ isso dá $n\approx5200$ amostras por tamanho. Medir expoentes com precisão é caro, e por isso se usam muitos tamanhos e ajustes globais, em vez de pares.
+
+\sol{7}
+(i) A malha é irregular: tem becos e regiões de grau baixo, e quarteirões de tamanhos variados. A desordem estrutural soma flutuações entre amostras. (ii) O recorte é retangular e alongado (cerca de 6,4 km por 3,8 km), e o lado menor controla a conexão, então o $L$ efetivo é menor que $\sqrt N$. (iii) Há muita borda. Para medir o $L$ efetivo: meça a largura em recortes de vários tamanhos da mesma cidade e ajuste $\sigma = A\,L_{\rm ef}^{-3/4}$; ou defina $L_{\rm ef}$ pelo número médio de passos do caminho mínimo entre lados opostos (a ``distância química'').
+
+\end{document}

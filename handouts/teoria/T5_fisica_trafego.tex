@@ -1,0 +1,138 @@
+\documentclass[11pt]{article}
+\usepackage{handout}
+\codigo{T5}
+\titulo{Física do Tráfego: Ondas, Equilíbrio e o Paradoxo de Braess}
+
+\begin{document}
+\fazertitulo
+
+O projeto trata cada via como um ``resistor'' com velocidade $r_e$. Mas de onde vêm as velocidades? Este handout cobre a física por trás delas, em duas escalas. Na escala de \emph{uma via}: densidade, fluxo e ondas de choque (o modelo LWR). Na escala da \emph{rede}: como milhares de motoristas egoístas escolhem rotas (o equilíbrio de Wardrop) e por que isso pode dar resultados contraintuitivos (o paradoxo de Braess). É o material necessário para a melhoria nº~3 do projeto, a de pôr reroteamento no modelo.
+
+Para ler mais: M.~Treiber e A.~Kesting, \emph{Traffic Flow Dynamics} (Springer, 2013), caps.\ 7--8; Y.~Sheffi, \emph{Urban Transportation Networks} (1985, livre na internet), caps.\ 2--5; T.~Roughgarden, \emph{Selfish Routing and the Price of Anarchy} (MIT, 2005). Pré-requisitos: derivadas parciais e multiplicadores de Lagrange. \pontos{15}
+
+\section{O diagrama fundamental}
+
+Numa via, três grandezas macroscópicas: a densidade $\rho$ (carros por km), a velocidade média $v$ e o fluxo $Q = \rho v$ (carros por hora). O \emph{diagrama fundamental} é a relação $Q(\rho)$. O modelo mais simples é o de Greenshields (1935): $v = v_f(1-\rho/\rho_j)$, com $\rho_j$ a densidade de engarrafamento total.
+
+\begin{ideia}
+Com Greenshields, $Q(\rho) = v_f\rho(1-\rho/\rho_j)$ é uma parábola, com máximo $Q_{\max} = v_f\rho_j/4$ em $\rho = \rho_j/2$. Isso divide a via em dois regimes:
+\begin{itemize}
+  \item \textbf{livre} ($\rho<\rho_j/2$): mais carros, mais fluxo;
+  \item \textbf{congestionado} ($\rho>\rho_j/2$): mais carros, \emph{menos} fluxo.
+\end{itemize}
+O mesmo fluxo $Q<Q_{\max}$ pode acontecer em duas densidades. O congestionamento é o ramo instável da direita.
+\end{ideia}
+
+\section{Conservação de carros e ondas}
+
+Carros não somem: num trecho $[x, x+\dd x]$, a variação do número de carros é o que entra menos o que sai. No contínuo,
+\[
+\frac{\partial\rho}{\partial t}+\frac{\partial Q}{\partial x} = 0,\qquad Q = Q(\rho).
+\]
+Este é o modelo LWR (Lighthill--Whitham, 1955; Richards, 1956). Pela regra da cadeia, $\partial_xQ = Q'(\rho)\,\partial_x\rho$, então $\partial_t\rho + c(\rho)\,\partial_x\rho = 0$, com
+\[
+c(\rho) = \frac{\dd Q}{\dd\rho}.
+\]
+A densidade é \emph{transportada} com velocidade $c(\rho)$: é uma onda.
+
+\begin{ideia}
+\begin{itemize}
+  \item A velocidade das ondas, $c = Q'(\rho) = v_f(1-2\rho/\rho_j)$, é \emph{menor} que a velocidade dos carros, $v = v_f(1-\rho/\rho_j)$. No regime congestionado, $c<0$: as perturbações andam \emph{para trás}, mesmo com os carros andando para frente. É a ``sanfona'' de freadas que se propaga contra o trânsito.
+  \item Quando uma região densa fica atrás de uma rarefeita, as ondas se cruzam e formam uma \emph{onda de choque} (uma descontinuidade em $\rho$), que anda com velocidade
+  \[
+  s = \frac{Q_2-Q_1}{\rho_2-\rho_1}.
+  \]
+\end{itemize}
+\end{ideia}
+
+\begin{exemplo}
+Uma avenida com $v_f = 60$ km/h está com densidade $\rho_1 = \rho_j/4$ quando o sinal fecha. Com que velocidade a fila cresce para trás?
+\end{exemplo}
+\begin{solucao}
+Na fila, $\rho_2 = \rho_j$ e $Q_2 = 0$. Antes da fila, $Q_1 = v_f\rho_1(1-\rho_1/\rho_j) = \tfrac{3}{16}v_f\rho_j$. Então
+\[
+s = \frac{0-\tfrac3{16}v_f\rho_j}{\rho_j-\tfrac14\rho_j} = -\frac{v_f}{4} = -15\ \text{km/h}.
+\]
+Em geral, $s = -v_f\rho_1/\rho_j$. A fila cresce para trás a 15 km/h: em 30 segundos de vermelho, 125 metros.
+\end{solucao}
+
+\problema{2} Mostre que a velocidade do choque entre os estados $\rho_1$ e $\rho_2$ no modelo de Greenshields é $s = v_f[1-(\rho_1+\rho_2)/\rho_j]$. Quando o sinal abre, a fila se dissolve. A frente de dissolução é um choque ou uma onda que se espalha (um ``leque'')? Por quê?
+
+\problema{3} \textbf{Engarrafamento sem causa.} Em estradas, aparecem engarrafamentos ``fantasmas'', sem acidente nem obra (Sugiyama \emph{et al.}, New J.\ Phys.\ \textbf{10}, 033001, 2008, filmaram isso com 22 carros num círculo). O modelo LWR puro não produz esse efeito. Que ingrediente físico falta? \emph{Dica:} motoristas reagem com atraso. Por que esse fenômeno é uma \emph{instabilidade}, no mesmo sentido de uma transição de fase?
+
+\section{Equilíbrio de Wardrop}
+
+Agora a rede. $n$ motoristas querem ir de $s$ a $t$, e cada via $e$ tem um tempo de viagem $t_e(x_e)$ que cresce com o fluxo $x_e$ (por exemplo, a função BPR do P1). Cada motorista escolhe a rota mais rápida \emph{para si}.
+
+\begin{ideia}
+\textbf{Primeiro princípio de Wardrop (1952), o equilíbrio do usuário:} no equilíbrio, todas as rotas \emph{usadas} entre um par origem--destino têm o mesmo tempo, e nenhuma rota não usada é mais rápida. Ninguém ganha mudando sozinho de rota: é um equilíbrio de Nash.
+
+\textbf{Segundo princípio, o ótimo do sistema:} o fluxo que minimiza o tempo \emph{total} $\sum_e x_et_e(x_e)$. Em geral, os dois são diferentes.
+\end{ideia}
+
+\begin{exemplo}
+\textbf{Pigou.} Uma unidade de fluxo vai de $s$ a $t$ por duas vias paralelas: a via 1 tem tempo fixo $t_1 = 1$, e a via 2 tem $t_2 = x$, onde $x$ é o fluxo nela. Compare o equilíbrio e o ótimo.
+\end{exemplo}
+\begin{solucao}
+\emph{Equilíbrio:} se $x<1$, a via 2 é mais rápida que a 1 ($x<1$), e alguém da via 1 mudaria. Então todos vão pela via 2, $x=1$, e todos levam tempo 1. Custo total: $C_{\rm eq} = 1$. \emph{Ótimo:} minimize $C = (1-x)\cdot1+x\cdot x$. Com $C' = -1+2x = 0$, $x = 1/2$ e $C_{\rm ot} = 3/4$. O \emph{preço da anarquia} é $C_{\rm eq}/C_{\rm ot} = 4/3$. Roughgarden e Tardos (2002) provaram que, para tempos lineares, ele \emph{nunca} passa de $4/3$, em qualquer rede.
+\end{solucao}
+
+\problema{3} \textbf{Pigou com BPR.} Troque $t_2 = x$ por $t_2 = x^4$ (o termo dominante da BPR com saturação). Mostre que o equilíbrio continua com custo 1, que o ótimo manda $x = 5^{-1/4}$ pela via 2, e que o preço da anarquia é $\approx2{,}15$. Por que redes com $\beta = 4$ são mais ``anárquicas''?
+
+\problema{3} \textbf{O potencial de Beckmann.} Mostre que o equilíbrio de Wardrop é o mínimo de
+\[
+\Phi(\bm x) = \sum_e\int_0^{x_e}t_e(s)\,\dd s,
+\]
+sujeito à conservação do fluxo. \emph{Dica:} use multiplicadores de Lagrange com rotas, $x_e = \sum_{P\ni e}f_P$, $\sum_Pf_P = n$, $f_P\ge0$, e mostre que as condições de mínimo são exatamente as de Wardrop. Por que isso garante que o equilíbrio existe e é único nos fluxos das vias (com $t_e$ crescente)?
+
+\section{O paradoxo de Braess}
+
+\begin{exemplo}
+São 4000 motoristas de START a END, com duas rotas. A rota superior passa por A: o trecho START$\to$A leva $T/100$ minutos ($T$ = número de carros nele) e o trecho A$\to$END leva 45 minutos fixos. A rota inferior passa por B: START$\to$B leva 45 minutos fixos e B$\to$END leva $T/100$. A prefeitura constrói um atalho A$\to$B que leva 0 minutos. O que acontece?
+\end{exemplo}
+\begin{solucao}
+\emph{Antes:} por simetria, 2000 em cada rota, e cada uma leva $20+45 = 65$ min. \emph{Depois:} a rota START$\to$A$\to$B$\to$END leva no máximo $40+0+40 = 80 < 45+40$, e é a melhor para \emph{cada} motorista, qualquer que seja a escolha dos outros. No equilíbrio, todos a usam: $T = 4000$ nos dois trechos variáveis, e o tempo é $40+0+40 = 80$ min. \textbf{Construir uma via piorou todo mundo}, de 65 para 80 minutos.
+\end{solucao}
+
+\begin{ideia}
+O paradoxo de Braess (1968) não é uma curiosidade: aconteceu de verdade. Há relatos de que fechar a Rua 42 em Nova York (1990) e demolir uma via expressa em Seul (2003) \emph{melhoraram} o trânsito. A lição para o projeto é que destravar uma via (fazer $r_e\to1$) só é garantidamente bom se as rotas não mudarem. Com reroteamento, uma via ``destravada'' atrai motoristas e pode ficar lenta de novo, ou piorar as vizinhas.
+\end{ideia}
+
+\problema{2} No exemplo de Braess, encontre o ótimo do sistema \emph{com} o atalho (chame de $c$ o número de carros no atalho e use a simetria $a=b$). Ele usa o atalho? Depois encontre o pedágio $\tau$ (em minutos equivalentes) que, cobrado só no atalho, faz o equilíbrio coincidir com o ótimo.
+
+\section{Como pôr reroteamento no projeto}
+
+O equilíbrio de Wardrop numa rede grande se calcula iterativamente. O método mais simples é o das \emph{médias sucessivas} (MSA):
+\begin{enumerate}
+  \item comece com os fluxos de fluxo livre, $\bm x^{(0)}$ (é o que o projeto faz hoje, com a betweenness);
+  \item calcule os tempos $t_e(x_e^{(n)})$ e mande \emph{todo mundo} pelas rotas mais rápidas com esses tempos (atribuição tudo-ou-nada), obtendo $\bm y^{(n)}$;
+  \item atualize $\bm x^{(n+1)} = \bm x^{(n)}+\frac{1}{n+1}\left(\bm y^{(n)}-\bm x^{(n)}\right)$ e volte ao passo 2.
+\end{enumerate}
+
+\problema{2} Por que não usar simplesmente $\bm x^{(n+1)} = \bm y^{(n)}$? Pense no exemplo de Pigou começando com todos na via 2. O que o fator $1/(n+1)$ faz?
+
+\solucoes
+
+\sol{1}
+$Q_2-Q_1 = v_f(\rho_2-\rho_1)-\frac{v_f}{\rho_j}(\rho_2^2-\rho_1^2)$. Dividindo por $\rho_2-\rho_1$: $s = v_f[1-(\rho_1+\rho_2)/\rho_j]$. Na dissolução da fila, a região densa ($\rho_j$) fica \emph{à frente} e a rarefeita atrás. As ondas da frente andam mais devagar ($c(\rho_j) = -v_f$) que as de trás, então as características se \emph{afastam}: é um leque de rarefação, e não um choque. Os carros saem da fila um por um, acelerando: a densidade varia continuamente.
+
+\sol{2}
+Falta o tempo de reação (ou uma relaxação finita da velocidade): modelos como o de Payne--Whitham ou os de ``carro seguidor'' incluem $\dd v/\dd t = [V(\rho)-v]/\tau$. Com um atraso, uma pequena freada é amplificada pelo carro de trás, que freia mais forte, e assim por diante. Acima de uma densidade crítica, o fluxo homogêneo fica \emph{instável} e aparecem ondas de congestionamento espontâneas, como numa transição de fase. A densidade faz o papel da temperatura, e a amplitude das ondas, o do parâmetro de ordem.
+
+\sol{3}
+Equilíbrio: se $x<1$, $t_2 = x^4<1$, e a via 2 continua melhor. Logo $x=1$ e o custo é 1. Ótimo: $C = (1-x)+x^5$, $C' = -1+5x^4 = 0$, $x = 5^{-1/4} = 0{,}669$ e $C = 0{,}331+0{,}134 = 0{,}465$. Preço da anarquia: $1/0{,}465 = 2{,}15$. Com $\beta$ grande, a via 2 é ``de graça'' até perto da saturação e depois explode. O motorista individual não vê o custo que impõe aos outros (a derivada $x\,t_2'(x) = 4x^4$, que é grande), e quanto maior $\beta$, maior essa externalidade. Para polinômios de grau $d$, o pior caso cresce como $d/\ln d$.
+
+\sol{4}
+Escreva $\Phi$ em função dos $f_P$, com o Lagrangiano $\mathcal L = \Phi-\mu(\sum_Pf_P-n)$. Como $\partial\Phi/\partial f_P = \sum_{e\in P}t_e(x_e) = T_P$ (o tempo da rota $P$), as condições de KKT dizem: se $f_P>0$, $T_P = \mu$; se $f_P = 0$, $T_P\ge\mu$. É exatamente o primeiro princípio de Wardrop, com $\mu$ o tempo comum das rotas usadas. Se cada $t_e$ é crescente, $\Phi$ é estritamente convexa nos $x_e$, e o conjunto viável é convexo e compacto. Então o mínimo existe e é único nos fluxos das vias (as divisões entre rotas podem não ser únicas).
+
+\sol{5}
+Com $a = b$ carros nas rotas de cima e de baixo e $c$ no atalho ($2a+c = 4000$), os trechos variáveis levam $(a+c)/100 = (4000+c)/200$ minutos cada. O custo total é
+\[
+C(c) = 2\cdot\frac{(4000+c)^2}{4\cdot100}+45\,(4000-c),\qquad C'(c) = \frac{4000+c}{100}-45.
+\]
+Em $c=0$, $C'(0) = -5<0$: vale a pena pôr alguns carros no atalho! O ótimo é $c = 500$ (com $a=b=1750$). Os trechos variáveis levam $22{,}5$ min, as rotas de cima e de baixo levam $67{,}5$ min, o atalho leva $45$ min, e a média é $64{,}7$ min, um pouco melhor que os 65 sem atalho. Ou seja, o atalho \emph{pode} ajudar, desde que poucos o usem. Para implementar o ótimo como equilíbrio, as rotas usadas precisam ter o mesmo custo percebido: $45+\tau = 67{,}5$, ou seja, $\tau = 22{,}5$ min. Não por acaso, isso é a externalidade de Pigou de cada trecho variável, $x\,t'(x) = 2250/100 = 22{,}5$ min.
+
+\sol{6}
+No exemplo de Pigou com $\bm x = \bm y$: começando com todos na via 2 (tempo 1, igual à via 1), qualquer desempate manda todos para um lado, depois todos para o outro, e o fluxo oscila para sempre entre extremos. O fator $1/(n+1)$ faz cada iteração mudar só uma fração decrescente do fluxo: é uma média dos ``palpites'' tudo-ou-nada. A soma dos passos diverge (dá para chegar a qualquer lugar), mas os passos vão a zero (as oscilações morrem), e isso garante convergência para o equilíbrio quando os $t_e$ são crescentes.
+
+\end{document}

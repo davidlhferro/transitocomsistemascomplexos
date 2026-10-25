@@ -22,9 +22,11 @@ Ponto de partida: o protocolo de percolação de tráfego de Li *et al.* (PNAS *
 | | 1.7 Grafo direcionado (componentes fortemente conexos, mão única) | ⏳ |
 | | 1.8 Reroteamento dinâmico (equilíbrio de Wardrop) | ⏳ |
 | **2. Artigo (preprint)** | *Percolation-Driven Bottleneck Optimization in Urban Traffic Networks: A Case Study in Fortaleza* | ⏳ |
-| **3. Handouts (LaTeX)** | Teoria: [T1](handouts/pdf/T1_percolacao.pdf), [T2](handouts/pdf/T2_espectral.pdf), [T3](handouts/pdf/T3_kcore_betweenness.pdf) | ✅ |
+| **3. Handouts (LaTeX)** | Teoria: [T1](handouts/pdf/T1_percolacao.pdf), [T2](handouts/pdf/T2_espectral.pdf), [T3](handouts/pdf/T3_kcore_betweenness.pdf), [T4](handouts/pdf/T4_tamanho_finito.pdf), [T5](handouts/pdf/T5_fisica_trafego.pdf), [T6](handouts/pdf/T6_redes_dirigidas.pdf) | ✅ |
 | | Projeto: [P1](handouts/pdf/P1_modelo.pdf), [P2](handouts/pdf/P2_algoritmos.pdf), [P3](handouts/pdf/P3_resultados.pdf) | ✅ |
 | **4. Sabatina** | Perguntas no estilo do Prof. José Soares ao fim de cada módulo | em andamento |
+
+**Próximos passos:** veja o [Plano de Melhorias](PLANO_MELHORIAS.md).
 
 ### Handouts
 
@@ -35,6 +37,9 @@ Cada handout tem teoria, Ideias em destaque, exemplos resolvidos e problemas com
 | [**T1**](handouts/pdf/T1_percolacao.pdf) | Percolação, $p_c$, expoentes críticos, tamanho finito, $S_2$, red bonds | 10 (29 pts) |
 | [**T2**](handouts/pdf/T2_espectral.pdf) | Funções geradoras, Molloy–Reed, espectro de $A$, matriz de Hashimoto | 9 (25 pts) |
 | [**T3**](handouts/pdf/T3_kcore_betweenness.pdf) | $k$-cores, betweenness, controle de transições | 8 (19 pts) |
+| [**T4**](handouts/pdf/T4_tamanho_finito.pdf) | Escala de tamanho finito, ajustes, bootstrap, colapso de dados | 7 (17 pts) |
+| [**T5**](handouts/pdf/T5_fisica_trafego.pdf) | Diagrama fundamental, ondas de choque, Wardrop, Braess, MSA | 6 (15 pts) |
+| [**T6**](handouts/pdf/T6_redes_dirigidas.pdf) | Redes dirigidas, SCCs, gravata-borboleta, mão única em Fortaleza | 6 (15 pts) |
 | [**P1**](handouts/pdf/P1_modelo.pdf) | O modelo de velocidades, equação por equação | 8 (18 pts) |
 | [**P2**](handouts/pdf/P2_algoritmos.pdf) | Os algoritmos por dentro: union-find, varredura, pontes, validação | 8 (17 pts) |
 | [**P3**](handouts/pdf/P3_resultados.pdf) | Resultados em Fortaleza, limitações e roteiro de defesa | 4 (12 pts) |
@@ -117,7 +122,7 @@ As figuras da malha sintética (`figuras/sintetico_*`) continuam no repositório
 ## Limitações conhecidas
 
 - Velocidades **simuladas**. O próximo salto é calibrar com dados reais (GPS de ônibus da Etufor ou dados da AMC).
-- Grafo **não-direcionado** (conectividade fraca). Mão única exige componentes fortemente conexos.
+- Grafo **não-direcionado** (conectividade fraca). 72% das ruas do corredor são de mão única, e respeitando os sentidos o limiar cai de q_c ≈ 0,48 para ≈ 0,25 (handout T6). É a prioridade da Fase 2 do plano.
 - Carga por betweenness em fluxo livre, **sem reroteamento** (sem equilíbrio de Wardrop). Isso concentra a carga em um único corredor.
 - $q_c$ de uma única amostra não é monótono sob melhorias (handout T1, Problema 7). Por isso também reportamos $R$.
 
